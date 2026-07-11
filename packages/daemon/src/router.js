@@ -19,16 +19,19 @@ export function classify(instruction) {
   };
 }
 
-export function buildPrompt({ file, target, instruction }) {
+export function buildPrompt({ file, target, instruction, tailwind = true }) {
+  const styleRule = tailwind
+    ? 'use Tailwind classes for styling'
+    : "this project does NOT use Tailwind — match the file's existing styling approach (inline styles, CSS variables, or the project's stylesheets)";
   return [
-    'You are making a surgical UI edit in a codebase that uses React and Tailwind CSS.',
+    `You are making a surgical UI edit in a React codebase.`,
     `Edit ONLY this file: ${file}`,
     `The user selected this element (lines ${target.lines.start}-${target.lines.end}):`,
     '```jsx',
     target.snippet,
     '```',
     `Instruction: ${instruction}`,
-    'Rules: use Tailwind classes for styling, keep the change minimal and scoped to the selected element (and directly related code in the same file), do not reformat unrelated code, do not touch any other file.',
+    `Rules: ${styleRule}, keep the change minimal and scoped to the selected element (and directly related code in the same file), do not reformat unrelated code, do not touch any other file.`,
     'The file must remain valid JSX after your edit — in particular, if you add a sibling element at the root of a component return, wrap the siblings in a fragment (<>...</>).',
   ].join('\n');
 }

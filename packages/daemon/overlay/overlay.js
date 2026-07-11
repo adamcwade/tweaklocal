@@ -51,6 +51,7 @@
     hoverEl: null,
     selected: null, // { el, loc }
     editing: null, // { el, original }
+    tailwind: true, // daemon reports whether the app uses Tailwind
   };
 
   // ---------- helpers ----------
@@ -287,6 +288,14 @@
       pop.appendChild(row);
     }
 
+    // Deterministic style controls write Tailwind classes — without Tailwind
+    // in the app they'd be silent no-ops, so offer copy + NL lanes only.
+    if (!state.tailwind) {
+      const note = el('div', 'twk-row');
+      note.append(el('span', 'twk-meta', 'no Tailwind detected — style tweaks route through the model'));
+      pop.appendChild(note);
+    }
+    if (state.tailwind) {
     pop.appendChild(spacingRow('Padding', 'p'));
     pop.appendChild(spacingRow('Margin', 'm'));
 
@@ -341,6 +350,7 @@
       }
       reposition();
     };
+    } // end Tailwind-only controls
 
     const nlRow = el('div', 'twk-row');
     const input = el('input');
@@ -450,7 +460,13 @@
       if (e.type === 'totals') showTotals(e.totals);
     };
   } catch { /* daemon offline */ }
-  fetch(`${ORIGIN}/api/health`).then((r) => r.json()).then((h) => showTotals(h.totals)).catch(() => {});
+  fetch(`${ORIGIN}/api/health`)
+    .then((r) => r.json())
+    .then((h) => {
+      showTotals(h.totals);
+      if (h.tailwind === false) state.tailwind = false;
+    })
+    .catch(() => {});
 
   // ---------- mode + events ----------
   const hint = el('div', 'twk-hint', '⌘. select mode');

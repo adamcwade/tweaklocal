@@ -15,10 +15,20 @@ const BASELINE = {
   ms: Number(process.env.TWEAKLOCAL_BASELINE_MS || 19000),
 };
 
+function detectTailwind(root) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+    return Boolean({ ...pkg.dependencies, ...pkg.devDependencies }.tailwindcss);
+  } catch {
+    return false;
+  }
+}
+
 export function startServer({ root, port = 4100 }) {
   const undoStack = new Map(); // id -> { abs, before }
   const sseClients = new Set();
   let nextId = 1;
+  const tailwind = detectTailwind(root);
 
   const savingsPath = path.join(root, '.tweaklocal', 'savings.json');
   let totals = { usd: 0, ms: 0, count: 0 };
@@ -58,7 +68,7 @@ export function startServer({ root, port = 4100 }) {
       }
 
       if (req.method === 'GET' && url.pathname === '/api/health') {
-        return json(res, { ok: true, root, totals });
+        return json(res, { ok: true, root, totals, tailwind });
       }
 
       if (req.method === 'GET' && url.pathname === '/api/events') {
@@ -115,7 +125,7 @@ export function startServer({ root, port = 4100 }) {
           broadcast({ type: 'tweak', id, kind: route.kind, status: 'queued', model: route.model, label: body.instruction.slice(0, 60) });
           json(res, { ok: true, id, model: route.model, kind: route.kind });
 
-          const prompt = buildPrompt({ file, target, instruction: body.instruction });
+          const prompt = buildPrompt({ file, target, instruction: body.instruction, tailwind });
           const result = await runClaude({
             prompt,
             model: route.model,

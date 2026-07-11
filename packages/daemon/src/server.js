@@ -120,6 +120,17 @@ export function startServer({ root, port = 4100 }) {
     }
   });
 
+  server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+      console.error(
+        `[fastui] port ${port} is already in use (another daemon running?).\n` +
+          `         Stop it with: lsof -ti:${port} | xargs kill\n` +
+          `         Or pick another port: fastui --port ${port + 1} (and set window.FASTUI_ORIGIN to match)`
+      );
+      process.exit(1);
+    }
+    throw e;
+  });
   server.listen(port, () => {
     console.log(`[fastui] daemon on http://localhost:${port} (root: ${root})`);
   });

@@ -1,6 +1,8 @@
 import { spawn } from 'node:child_process';
 
-const FUNCTIONALITY = /(click|toggle|open|close|submit|fetch|load|save|state|counter|count|when |on hover|scroll to|navigate|link to|form|validate|sort|filter|search|api|localstorage|modal|dropdown|expand|collapse|disable|enable|animate|animation|add a |remove the )/i;
+// Behavior verbs only — visual states like "on hover"/"on focus" are style
+// (Tailwind variants), not functionality.
+const FUNCTIONALITY = /(click|toggle|open|close|submit|fetch|load|save|state|counter|count|when |scroll to|navigate|link to|form|validate|sort|filter|search|api|localstorage|modal|dropdown|expand|collapse|disable|enable|animate|animation|add a |remove the )/i;
 
 /**
  * Route a natural-language tweak to a model tier.

@@ -1,0 +1,80 @@
+[
+  {
+    "task": "copy: rewrite hero headline",
+    "baseline": {
+      "ok": true,
+      "wallMs": 18369,
+      "tokens": 136986,
+      "costUSD": 0.10581795000000001,
+      "turns": 5,
+      "pass": true
+    },
+    "fastui": {
+      "ok": true,
+      "wallMs": 6,
+      "tokens": 0,
+      "costUSD": 0,
+      "model": "—",
+      "pass": true
+    }
+  },
+  {
+    "task": "style: bump section heading size",
+    "baseline": {
+      "ok": true,
+      "wallMs": 19343,
+      "tokens": 137064,
+      "costUSD": 0.09239520000000001,
+      "turns": 5,
+      "pass": true
+    },
+    "fastui": {
+      "ok": true,
+      "wallMs": 3,
+      "tokens": 0,
+      "costUSD": 0,
+      "model": "—",
+      "pass": true
+    }
+  },
+  {
+    "task": "style NL: glow on Book a demo",
+    "baseline": {
+      "ok": true,
+      "wallMs": 16334,
+      "tokens": 109787,
+      "costUSD": 0.08404185,
+      "turns": 4,
+      "pass": true
+    },
+    "fastui": {
+      "ok": true,
+      "wallMs": 15990,
+      "tokens": 84749,
+      "costUSD": 0.03171415,
+      "turns": 3,
+      "model": "haiku",
+      "pass": true
+    }
+  },
+  {
+    "task": "functionality NL: confirmation state on CTA",
+    "baseline": {
+      "ok": true,
+      "wallMs": 18407,
+      "tokens": 111434,
+      "costUSD": 0.0929115,
+      "turns": 4,
+      "pass": true
+    },
+    "fastui": {
+      "ok": true,
+      "wallMs": 18355,
+      "tokens": 111031,
+      "costUSD": 0.08655014999999999,
+      "turns": 4,
+      "model": "sonnet",
+      "pass": true
+    }
+  }
+]

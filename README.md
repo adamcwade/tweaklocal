@@ -22,6 +22,22 @@ pnpm --filter demo dev                                        # vite on :5173
 
 Open http://localhost:5173, press `⌘.`, click anything.
 
+## Use it in your own project (pre-npm)
+
+Requirements: Vite + React (jsx/tsx), Tailwind for the style lanes, `claude` CLI for NL tweaks.
+
+1. Add the plugin from this repo:
+   ```sh
+   pnpm add -D file:/path/to/fast-ui-updates/packages/babel-plugin-fastui
+   ```
+2. In `vite.config.js`, mirror the demo config ([apps/demo/vite.config.js](apps/demo/vite.config.js)): pass the babel plugin to `react()` in dev, and add the `fastui-overlay-inject` snippet that injects `http://localhost:4100/overlay.js`.
+3. Run the daemon from your project root (so file paths resolve):
+   ```sh
+   cd your-project && node /path/to/fast-ui-updates/packages/daemon/bin/fastui.js
+   ```
+
+Estimated savings accumulate in `.fastui/savings.json` (gitignore it).
+
 ## Layout
 
 - `packages/babel-plugin-fastui` — source stamping

@@ -8,10 +8,32 @@ import { classify, buildPrompt, runClaude } from './router.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OVERLAY_PATH = path.join(__dirname, '..', 'overlay', 'overlay.js');
 
+// Baseline for "estimated savings": median unscoped-agent edit from
+// packages/benchmark results (sonnet, Read/Edit/Glob/Grep). Overridable.
+const BASELINE = {
+  usd: Number(process.env.FASTUI_BASELINE_COST || 0.093),
+  ms: Number(process.env.FASTUI_BASELINE_MS || 19000),
+};
+
 export function startServer({ root, port = 4100 }) {
   const undoStack = new Map(); // id -> { abs, before }
   const sseClients = new Set();
   let nextId = 1;
+
+  const savingsPath = path.join(root, '.fastui', 'savings.json');
+  let totals = { usd: 0, ms: 0, count: 0 };
+  try { totals = JSON.parse(fs.readFileSync(savingsPath, 'utf8')); } catch { /* first run */ }
+  function recordSavings(costUSD = 0, ms = 0) {
+    const saved = { usd: Math.max(0, BASELINE.usd - costUSD), ms: Math.max(0, BASELINE.ms - ms) };
+    totals.usd += saved.usd;
+    totals.ms += saved.ms;
+    totals.count += 1;
+    try {
+      fs.mkdirSync(path.dirname(savingsPath), { recursive: true });
+      fs.writeFileSync(savingsPath, JSON.stringify(totals));
+    } catch { /* savings persistence is best-effort */ }
+    return { saved, totals };
+  }
 
   function broadcast(event) {
     const line = `data: ${JSON.stringify(event)}\n\n`;
@@ -36,7 +58,7 @@ export function startServer({ root, port = 4100 }) {
       }
 
       if (req.method === 'GET' && url.pathname === '/api/health') {
-        return json(res, { ok: true, root });
+        return json(res, { ok: true, root, totals });
       }
 
       if (req.method === 'GET' && url.pathname === '/api/events') {
@@ -62,7 +84,7 @@ export function startServer({ root, port = 4100 }) {
           const id = nextId++;
           const write = applyTextEdit(root, body.loc, body.oldText, body.newText);
           remember(id, write);
-          broadcast({ type: 'tweak', id, kind: 'copy', status: 'done', tokens: 0, label: `copy: "${body.newText.slice(0, 40)}"` });
+          broadcast({ type: 'tweak', id, kind: 'copy', status: 'done', tokens: 0, label: `copy: "${body.newText.slice(0, 40)}"`, ...recordSavings(0, 50) });
           return json(res, { ok: true, id });
         }
 
@@ -70,7 +92,7 @@ export function startServer({ root, port = 4100 }) {
           const id = nextId++;
           const write = applyClassEdit(root, body.loc, body.remove || [], body.add || []);
           remember(id, write);
-          broadcast({ type: 'tweak', id, kind: 'style', status: 'done', tokens: 0, label: `style: ${(body.add || []).join(' ')}` });
+          broadcast({ type: 'tweak', id, kind: 'style', status: 'done', tokens: 0, label: `style: ${(body.add || []).join(' ')}`, ...recordSavings(0, 50) });
           return json(res, { ok: true, id });
         }
 
@@ -130,6 +152,7 @@ export function startServer({ root, port = 4100 }) {
             durationMs: result.durationMs,
             costUSD: result.costUSD,
             error: result.error,
+            ...(result.ok ? recordSavings(result.costUSD || 0, result.durationMs || 0) : {}),
           });
           return;
         }

@@ -6,22 +6,29 @@
   const script = [...document.scripts].find((s) => /\/overlay\.js/.test(s.src));
   const ORIGIN = window.FASTUI_ORIGIN || (script ? new URL(script.src).origin : 'http://localhost:4100');
 
-  const PAD_SCALE = ['0', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '5', '6', '7', '8', '9', '10', '11', '12', '14', '16', '20', '24'];
-  const FONT_SCALE = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl', 'text-5xl', 'text-6xl', 'text-7xl'];
+  const SPACE_SCALE = ['0', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '5', '6', '7', '8', '9', '10', '11', '12', '14', '16', '20', '24'];
+  const FONT_FALLBACK = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl', 'text-5xl', 'text-6xl', 'text-7xl'];
 
   const css = `
   #fui-root{position:fixed;inset:0;pointer-events:none;z-index:2147483000;font-family:ui-sans-serif,system-ui,sans-serif}
   .fui-outline{position:fixed;border:1.5px solid #6366f1;border-radius:3px;background:rgba(99,102,241,.08);pointer-events:none;transition:all .04s linear}
   .fui-outline.fui-selected{border-color:#10b981;background:rgba(16,185,129,.06)}
   .fui-badge{position:fixed;background:#312e81;color:#e0e7ff;font-size:11px;padding:2px 7px;border-radius:4px;pointer-events:none;white-space:nowrap;transform:translateY(-100%)}
-  .fui-pop{position:fixed;background:#111827;color:#f9fafb;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);padding:8px;pointer-events:auto;display:flex;flex-direction:column;gap:6px;min-width:280px;font-size:12px}
-  .fui-row{display:flex;gap:6px;align-items:center}
+  .fui-pop{position:fixed;background:#111827;color:#f9fafb;border:1.5px solid #10b981;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);padding:8px;pointer-events:auto;display:flex;flex-direction:column;gap:6px;min-width:300px;max-width:340px;font-size:12px}
+  .fui-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
   .fui-pop button{background:#374151;color:#f9fafb;border:none;border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer}
   .fui-pop button:hover{background:#4b5563}
   .fui-pop button.fui-primary{background:#6366f1}
   .fui-pop input{flex:1;background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:5px 8px;font-size:12px;outline:none}
-  .fui-label{color:#9ca3af;min-width:52px}
-  .fui-tray{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:6px;pointer-events:auto;max-width:340px}
+  .fui-pop select{background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:3px 4px;font-size:11.5px;outline:none}
+  .fui-label{color:#9ca3af;min-width:50px}
+  .fui-cur{color:#6ee7b7;font-size:11px;margin-left:auto}
+  .fui-swatches{display:flex;gap:4px;flex-wrap:wrap;max-height:96px;overflow-y:auto;padding:2px}
+  .fui-swatch{width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
+  .fui-swatch:hover{transform:scale(1.15)}
+  .fui-chip{font-size:10.5px !important;padding:2px 6px !important}
+  .fui-tray{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:6px;pointer-events:auto;max-width:360px}
+  .fui-total{background:#064e3b;color:#a7f3d0;border-radius:8px;padding:5px 10px;font-size:11.5px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
   .fui-tweak{background:#111827;color:#e5e7eb;border-radius:8px;padding:6px 10px;font-size:11.5px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3)}
   .fui-dot{width:8px;height:8px;border-radius:50%;flex:none}
   .fui-dot.done{background:#10b981}.fui-dot.queued,.fui-dot.running{background:#f59e0b;animation:fui-pulse 1s infinite}.fui-dot.error{background:#ef4444}.fui-dot.reverted{background:#6b7280}
@@ -70,6 +77,43 @@
     const r = target.getBoundingClientRect();
     Object.assign(box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
     return r;
+  }
+
+  // ---------- design system (Tailwind v4 theme vars from the page's CSS) ----------
+  let theme = null;
+  function readTheme() {
+    if (theme) return theme;
+    const vars = {};
+    const visit = (rules) => {
+      for (const rule of rules) {
+        if (rule.cssRules) { try { visit(rule.cssRules); } catch { /* cross-origin */ } }
+        if (rule.style) {
+          for (const prop of rule.style) {
+            if (prop.startsWith('--')) vars[prop] = rule.style.getPropertyValue(prop).trim();
+          }
+        }
+      }
+    };
+    for (const sheet of document.styleSheets) {
+      try { visit(sheet.cssRules); } catch { /* cross-origin */ }
+    }
+    const px = (v) => {
+      const m = /^([\d.]+)(px|rem|em)?$/.exec(v);
+      return m ? parseFloat(m[1]) * (m[2] === 'px' ? 1 : 16) : NaN;
+    };
+    let textSizes = Object.keys(vars)
+      .filter((k) => /^--text-[a-z0-9]+$/.test(k))
+      .map((k) => ({ cls: 'text-' + k.slice(7), px: px(vars[k]) }))
+      .filter((t) => !isNaN(t.px))
+      .sort((a, b) => a.px - b.px)
+      .map((t) => t.cls);
+    if (textSizes.length < 3) textSizes = FONT_FALLBACK;
+    const colors = Object.keys(vars)
+      .filter((k) => /^--color-[a-z0-9-]+$/.test(k))
+      .map((k) => ({ name: k.slice(8), value: vars[k] }))
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    theme = { textSizes, colors, fromDS: colors.length > 0 };
+    return theme;
   }
 
   // ---------- hover ----------
@@ -126,28 +170,12 @@
     const r = positionBox(selBox, s.el);
     pop.style.display = 'flex';
     const top = r.bottom + 8 + pop.offsetHeight > innerHeight ? r.top - pop.offsetHeight - 8 : r.bottom + 8;
-    Object.assign(pop.style, { left: Math.min(r.left, innerWidth - 320) + 'px', top: Math.max(top, 8) + 'px' });
+    Object.assign(pop.style, { left: Math.min(Math.max(r.left, 8), innerWidth - 356) + 'px', top: Math.max(top, 8) + 'px' });
   }
 
-  // ---------- popover ----------
-  function hasEditableText(target) {
-    return target.children.length === 0 && target.textContent.trim().length > 0;
-  }
-
-  function scaleStep(target, regexOrList, scale, prefix, dir, fallback) {
-    const classes = classList(target);
-    let current = classes.find((c) => (Array.isArray(regexOrList) ? regexOrList.includes(c) : regexOrList.test(c)));
-    let idx = current
-      ? scale.indexOf(Array.isArray(regexOrList) ? current : current.slice(prefix.length))
-      : scale.indexOf(fallback);
-    const next = Math.min(Math.max(idx + dir, 0), scale.length - 1);
-    if (next === idx && current) return null;
-    const add = Array.isArray(regexOrList) ? scale[next] : prefix + scale[next];
-    return { remove: current ? [current] : [], add: [add] };
-  }
-
+  // ---------- class tweaks ----------
   async function applyClassTweak(change, label) {
-    if (!change) return;
+    if (!change || (!change.remove.length && !change.add.length)) return;
     const s = state.selected;
     change.remove.forEach((c) => s.el.classList.remove(c)); // optimistic
     change.add.forEach((c) => s.el.classList.add(c));
@@ -157,11 +185,90 @@
     } catch (e) {
       addTweak({ id: 'x' + Date.now(), status: 'error', label: `${label}: ${e.message}` });
     }
-    setTimeout(reposition, 350); // after HMR
+    setTimeout(() => { reposition(); renderPopover(); }, 350); // after HMR
+  }
+
+  // ---------- popover ----------
+  function hasEditableText(target) {
+    return target.children.length === 0 && target.textContent.trim().length > 0;
+  }
+
+  // Step a spacing class (p/m with optional side) along the Tailwind scale.
+  function spacingStep(target, base, side, dir) {
+    const prefix = base + side; // e.g. p, pt, m, ml
+    const re = new RegExp(`^${prefix}-(\\d+(?:\\.\\d+)?)$`);
+    const classes = classList(target);
+    const cur = classes.find((c) => re.test(c));
+    let from = cur ? re.exec(cur)[1] : null;
+    if (from == null && side) {
+      // side not set: start from the shorthand (pt-6 wins over p-4 in Tailwind ordering)
+      const allRe = new RegExp(`^${base}-(\\d+(?:\\.\\d+)?)$`);
+      const all = classes.find((c) => allRe.test(c));
+      from = all ? allRe.exec(all)[1] : '0';
+    }
+    if (from == null) from = '0';
+    let idx = SPACE_SCALE.indexOf(from);
+    if (idx < 0) idx = 0;
+    const next = Math.min(Math.max(idx + dir, 0), SPACE_SCALE.length - 1);
+    if (SPACE_SCALE[next] === from && cur) return null;
+    return { remove: cur ? [cur] : [], add: [`${prefix}-${SPACE_SCALE[next]}`] };
+  }
+
+  function fontStep(target, dir) {
+    const scale = readTheme().textSizes;
+    const classes = classList(target);
+    const cur = classes.find((c) => scale.includes(c));
+    let idx = cur ? scale.indexOf(cur) : scale.indexOf('text-base');
+    if (idx < 0) idx = Math.floor(scale.length / 2);
+    const next = Math.min(Math.max(idx + dir, 0), scale.length - 1);
+    if (scale[next] === cur) return null;
+    return { remove: cur ? [cur] : [], add: [scale[next]] };
+  }
+
+  // Property editor: which classes to strip when setting each property.
+  const colorClassRe = (prefix) =>
+    new RegExp(`^${prefix}-(?:[a-z]+-\\d+(?:/\\d+)?|white|black|transparent|current|inherit)$`);
+  const PROPS = {
+    Background: { type: 'color', prefix: 'bg' },
+    'Text color': { type: 'color', prefix: 'text' },
+    'Border color': { type: 'color', prefix: 'border', ensure: 'border' },
+    Radius: { type: 'list', removeRe: /^rounded(-(none|sm|md|lg|xl|2xl|3xl|full))?$/, options: ['rounded-none', 'rounded-sm', 'rounded-md', 'rounded-lg', 'rounded-xl', 'rounded-2xl', 'rounded-3xl', 'rounded-full'] },
+    Shadow: { type: 'list', removeRe: /^shadow(-(none|sm|md|lg|xl|2xl))?$/, options: ['shadow-none', 'shadow-sm', 'shadow-md', 'shadow-lg', 'shadow-xl', 'shadow-2xl'] },
+  };
+
+  function propChange(target, propName, valueClass) {
+    const p = PROPS[propName];
+    const classes = classList(target);
+    const re = p.type === 'color' ? colorClassRe(p.prefix) : p.removeRe;
+    const remove = classes.filter((c) => re.test(c) && c !== valueClass);
+    const add = classes.includes(valueClass) ? [] : [valueClass];
+    if (p.ensure && !classes.some((c) => /^border(-\d+)?$/.test(c))) add.push(p.ensure);
+    return { remove, add };
+  }
+
+  function spacingRow(label, base) {
+    const s = state.selected;
+    const row = el('div', 'fui-row');
+    row.append(el('span', 'fui-label', label));
+    const sideSel = el('select');
+    for (const [name, v] of [['All', ''], ['Top', 't'], ['Right', 'r'], ['Bottom', 'b'], ['Left', 'l']]) {
+      const o = el('option', null, name);
+      o.value = v;
+      sideSel.appendChild(o);
+    }
+    const minus = el('button', null, '−');
+    const plus = el('button', null, '+');
+    minus.onclick = () => applyClassTweak(spacingStep(s.el, base, sideSel.value, -1), label);
+    plus.onclick = () => applyClassTweak(spacingStep(s.el, base, sideSel.value, +1), label);
+    row.append(sideSel, minus, plus);
+    const cur = classList(s.el).filter((c) => new RegExp(`^${base}[trbl]?-`).test(c)).join(' ');
+    if (cur) row.append(el('span', 'fui-cur', cur));
+    return row;
   }
 
   function renderPopover() {
     const s = state.selected;
+    if (!s) return;
     pop.textContent = '';
 
     const head = el('div', 'fui-row');
@@ -177,21 +284,60 @@
       pop.appendChild(row);
     }
 
-    const padRow = el('div', 'fui-row');
-    padRow.append(el('span', 'fui-label', 'Padding'));
-    const padMinus = el('button', null, '−');
-    const padPlus = el('button', null, '+');
-    padMinus.onclick = () => applyClassTweak(scaleStep(s.el, /^p-(\d+(\.\d+)?)$/, PAD_SCALE, 'p-', -1, '0'), 'padding');
-    padPlus.onclick = () => applyClassTweak(scaleStep(s.el, /^p-(\d+(\.\d+)?)$/, PAD_SCALE, 'p-', +1, '0'), 'padding');
-    padRow.append(padMinus, padPlus);
+    pop.appendChild(spacingRow('Padding', 'p'));
+    pop.appendChild(spacingRow('Margin', 'm'));
 
-    padRow.append(el('span', 'fui-label', 'Font'));
+    const fontRow = el('div', 'fui-row');
+    fontRow.append(el('span', 'fui-label', 'Font'));
     const fMinus = el('button', null, 'A−');
     const fPlus = el('button', null, 'A+');
-    fMinus.onclick = () => applyClassTweak(scaleStep(s.el, FONT_SCALE, FONT_SCALE, '', -1, 'text-base'), 'font');
-    fPlus.onclick = () => applyClassTweak(scaleStep(s.el, FONT_SCALE, FONT_SCALE, '', +1, 'text-base'), 'font');
-    padRow.append(fMinus, fPlus);
-    pop.appendChild(padRow);
+    fMinus.onclick = () => applyClassTweak(fontStep(s.el, -1), 'font');
+    fPlus.onclick = () => applyClassTweak(fontStep(s.el, +1), 'font');
+    fontRow.append(fMinus, fPlus);
+    const curFont = classList(s.el).find((c) => readTheme().textSizes.includes(c));
+    fontRow.append(el('span', 'fui-cur', curFont || 'inherited'));
+    pop.appendChild(fontRow);
+
+    // property editor
+    const propRow = el('div', 'fui-row');
+    propRow.append(el('span', 'fui-label', 'Style'));
+    const propSel = el('select');
+    propSel.appendChild(el('option', null, 'Choose property…'));
+    for (const name of Object.keys(PROPS)) {
+      const o = el('option', null, name);
+      o.value = name;
+      propSel.appendChild(o);
+    }
+    propRow.appendChild(propSel);
+    pop.appendChild(propRow);
+    const swatches = el('div', 'fui-swatches');
+    pop.appendChild(swatches);
+    propSel.onchange = () => {
+      swatches.textContent = '';
+      const p = PROPS[propSel.value];
+      if (!p) return;
+      if (p.type === 'color') {
+        const { colors, fromDS } = readTheme();
+        if (!fromDS) {
+          swatches.append(el('span', 'fui-meta', 'no design-system colors found in page CSS'));
+          return;
+        }
+        for (const c of colors) {
+          const b = el('button', 'fui-swatch');
+          b.style.background = c.value;
+          b.title = `${p.prefix}-${c.name}`;
+          b.onclick = () => applyClassTweak(propChange(s.el, propSel.value, `${p.prefix}-${c.name}`), propSel.value);
+          swatches.appendChild(b);
+        }
+      } else {
+        for (const opt of p.options) {
+          const b = el('button', 'fui-chip', opt);
+          b.onclick = () => applyClassTweak(propChange(s.el, propSel.value, opt), propSel.value);
+          swatches.appendChild(b);
+        }
+      }
+      reposition();
+    };
 
     const nlRow = el('div', 'fui-row');
     const input = el('input');
@@ -246,7 +392,16 @@
   // ---------- tray ----------
   const tray = el('div', 'fui-tray');
   root.appendChild(tray);
+  const totalBar = el('div', 'fui-total');
+  totalBar.style.display = 'none';
+  tray.appendChild(totalBar);
   const tweaks = new Map();
+
+  function showTotals(t) {
+    if (!t || !t.count) return;
+    totalBar.style.display = '';
+    totalBar.textContent = `≈ saved $${t.usd.toFixed(2)} · ${Math.round(t.ms / 1000)}s across ${t.count} tweak${t.count === 1 ? '' : 's'} (vs unscoped agent)`;
+  }
 
   function addTweak(t) {
     let row = tweaks.get(String(t.id));
@@ -264,9 +419,9 @@
         } catch (e) { row._meta.textContent = e.message; }
       };
       row.append(row._dot, row._label, row._meta, row._undo);
-      tray.prepend(row);
+      tray.insertBefore(row, totalBar.nextSibling);
       tweaks.set(String(t.id), row);
-      while (tray.children.length > 6) tray.lastChild.remove();
+      while (tray.children.length > 7) tray.lastChild.remove();
     }
     if (t.label) row._label.textContent = t.label;
     if (t.status) {
@@ -278,8 +433,10 @@
     if (t.tokens === 0) bits.push('0 tokens');
     if (t.durationMs) bits.push((t.durationMs / 1000).toFixed(1) + 's');
     if (t.costUSD != null) bits.push('$' + t.costUSD.toFixed(3));
+    if (t.saved) bits.push(`saved ~$${t.saved.usd.toFixed(2)}`);
     if (t.error) bits.push(t.error.slice(0, 80));
     if (bits.length) row._meta.textContent = bits.join(' · ');
+    if (t.totals) showTotals(t.totals);
   }
 
   try {
@@ -287,8 +444,10 @@
     es.onmessage = (m) => {
       const e = JSON.parse(m.data);
       if (e.type === 'tweak') addTweak(e);
+      if (e.type === 'totals') showTotals(e.totals);
     };
   } catch { /* daemon offline */ }
+  fetch(`${ORIGIN}/api/health`).then((r) => r.json()).then((h) => showTotals(h.totals)).catch(() => {});
 
   // ---------- mode + events ----------
   const hint = el('div', 'fui-hint', '⌘. select mode');

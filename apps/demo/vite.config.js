@@ -2,12 +2,14 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react({
-      babel: {
-        plugins: [['@fastui/babel-plugin', { root: process.cwd() }]],
-      },
+      // fastui stamping is dev-only: production builds skip Babel entirely.
+      babel:
+        command === 'serve'
+          ? { plugins: [['@fastui/babel-plugin', { root: process.cwd() }]] }
+          : undefined,
     }),
     tailwindcss(),
     {
@@ -27,4 +29,4 @@ export default defineConfig({
       },
     },
   ],
-});
+}));

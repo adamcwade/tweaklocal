@@ -195,6 +195,17 @@
     e.stopPropagation();
     const sel = state.selected;
     if (!sel || !document.contains(sel.el)) return;
+    // Check first so a refusal never flickers the element or loses the
+    // selection — only hide optimistically once we know it'll succeed.
+    deleteBtn.disabled = true;
+    try {
+      await api('delete', { loc: sel.loc, dryRun: true });
+    } catch (err) {
+      deleteBtn.disabled = false;
+      addTweak({ id: 'x' + Date.now(), status: 'error', label: err.message.slice(0, 140) });
+      return;
+    }
+    deleteBtn.disabled = false;
     sel.el.style.display = 'none'; // optimistic; HMR makes it real
     deselect();
     try {

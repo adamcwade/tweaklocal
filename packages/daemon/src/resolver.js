@@ -186,7 +186,7 @@ export function applyStyleEdit(root, loc, styles) {
  * alone on them. Refuses (throws) if the removal would leave the file
  * unparseable — e.g. deleting a component's only root element.
  */
-export function applyDeleteElement(root, loc) {
+export function applyDeleteElement(root, loc, { dryRun = false } = {}) {
   const { abs, content, element, file } = loadTarget(root, loc);
   let start = element.start;
   let end = element.end;
@@ -200,8 +200,20 @@ export function applyDeleteElement(root, loc) {
   try {
     parseSource(next, file);
   } catch {
-    throw new Error('deleting this element would break the file — describe the change instead');
+    // Almost always: this element is the ONLY thing its component (or a
+    // .map() callback) renders, so removing it would leave an empty
+    // `return ()` or `.map(() => ())` — invalid JS. Detect that specific,
+    // near-universal case to give an actionable message instead of a
+    // generic parse error.
+    const before = content.slice(0, start).trimEnd();
+    const soleReturn = /(return\s*\(?|=>\s*\(?)$/.test(before);
+    throw new Error(
+      soleReturn
+        ? "can't delete — it's the only thing this component (or list item) renders; deleting it would leave nothing to return. Describe the change instead (e.g. \"remove this from the list\") and it'll route through the model."
+        : 'deleting this element would break the file — describe the change instead'
+    );
   }
+  if (dryRun) return { abs, before: content, after: next, wouldWrite: false };
   return writeChecked(abs, content, next);
 }
 

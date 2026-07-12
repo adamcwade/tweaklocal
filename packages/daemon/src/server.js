@@ -118,6 +118,10 @@ export function startServer({ root, port = 4100 }) {
         }
 
         if (url.pathname === '/api/delete') {
+          if (body.dryRun) {
+            applyDeleteElement(root, body.loc, { dryRun: true }); // throws if unsafe, writes nothing
+            return json(res, { ok: true, dryRun: true });
+          }
           const id = nextId++;
           const target = describeTarget(root, body.loc);
           const write = applyDeleteElement(root, body.loc);

@@ -29,6 +29,16 @@ npm i -D tweaklocal @tweaklocal/react
 
 Works with Turbopack, webpack, and Vite — stamping happens in React's dev JSX runtime, not the bundler. Server components included. Production builds are untouched (the prod runtime is a passthrough).
 
+## Telemetry
+
+The daemon sends anonymous usage telemetry: package version, node version, OS platform, whether Tailwind was detected, and per-lane tweak counts. **Never** code, file paths, file names, prompts, or anything identifying. A disclosure prints the first time the daemon runs.
+
+Opt out permanently:
+
+```sh
+export TWEAKLOCAL_TELEMETRY=0   # or DO_NOT_TRACK=1 — both respected
+```
+
 ## Options
 
 - `npx tweaklocal --port 4101` (+ `<TweakLocalOverlay origin="http://localhost:4101" />`)

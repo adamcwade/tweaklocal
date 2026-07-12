@@ -92,7 +92,8 @@ Padding and margin per side. Font sizes and color swatches read from *your* Tail
 - **Undo per tweak,** right from the tray.
 - **Dev-only by construction.** The stamp lives in React's development runtime; production builds import a passthrough.
 - **Scoped AI, when AI runs at all.** The model sees one file and your instruction — not your repo.
-- **A running savings counter** shows what each tweak would have cost through an unscoped agent. Watch it add up; that's your invoice not happening.
+- **A running savings counter** shows what each tweak would have cost through an unscoped agent. Watch it add up; that's your invoice not happening. *(Want the receipts? Get a monthly savings report — email capture, see below.)*
+- **Telemetry that announces itself.** Anonymous usage counts only — version, OS, tweak counts. Never code, paths, or prompts. Disclosed on first run, disabled with one env var (`TWEAKLOCAL_TELEMETRY=0`), and `DO_NOT_TRACK` is respected.
 
 ---
 
@@ -113,6 +114,9 @@ Tailwind class edits are deterministic today; other styling systems route throug
 **Next.js only?**
 Next.js and Vite today — anything that emits React's standard dev JSX runtime. Remix/React Router support is planned.
 
+**What does telemetry collect?**
+Version, OS, and how many tweaks ran per lane — that's the whole payload. No code, no file paths, no prompts, no identity. It's disclosed the first time the daemon runs, `TWEAKLOCAL_TELEMETRY=0` turns it off forever, and we respect `DO_NOT_TRACK=1`. It exists so we know which frameworks to support next.
+
 ---
 
 ## Pricing
@@ -129,6 +133,23 @@ Design-system panels, model routing configuration, savings analytics, priority s
 Preview-deploy tweaking: designers and PMs point at staging, their tweaks arrive as PRs your engineers approve. Audit trail, SSO. *UI polish stops being a ticket queue.*
 
 **Beta note:** everything is free while we're in beta. Early users get grandfathered Pro pricing.
+
+---
+
+## Email capture (waitlist + savings report)
+
+*(One field, two placements. This list is the launch asset — every address here is a developer who already cares.)*
+
+**Placement 1 — below the hero install command:**
+> **Get the changelog + Pro early access.** One email when something ships. No drip sequence, no "just checking in."
+> `[you@company.dev] [Keep me posted]`
+
+**Placement 2 — the savings report (linked from the in-app tray):**
+> ### Your polish pass, itemized
+> TweakLocal already counts what every tweak would have cost through an unscoped agent. Get the monthly rollup: tweaks shipped, tokens avoided, dollars saved. One email a month, made of your own numbers.
+> `[you@company.dev] [Send my savings report]`
+
+*(Annotation: placement 2 converts because the user arrives from the tray already looking at their number — the email is a continuation of value, not an interruption. Both feed one list, tagged by source.)*
 
 ---
 

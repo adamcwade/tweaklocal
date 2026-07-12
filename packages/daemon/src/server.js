@@ -4,9 +4,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describeTarget, applyTextEdit, applyClassEdit, applyStyleEdit, applyDeleteElement, parseLoc, checkSyntax } from './resolver.js';
 import { classify, buildPrompt, runClaude } from './router.js';
+import { initTelemetry, DISCLOSURE } from './telemetry.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OVERLAY_PATH = path.join(__dirname, '..', 'overlay', 'overlay.js');
+const VERSION = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8')
+).version;
 
 // Baseline for "estimated savings": median unscoped-agent edit from
 // packages/benchmark results (sonnet, Read/Edit/Glob/Grep). Overridable.
@@ -29,6 +33,7 @@ export function startServer({ root, port = 4100 }) {
   const sseClients = new Set();
   let nextId = 1;
   const tailwind = detectTailwind(root);
+  const telemetry = initTelemetry({ version: VERSION, tailwind });
 
   const savingsPath = path.join(root, '.tweaklocal', 'savings.json');
   let totals = { usd: 0, ms: 0, count: 0 };
@@ -68,7 +73,7 @@ export function startServer({ root, port = 4100 }) {
       }
 
       if (req.method === 'GET' && url.pathname === '/api/health') {
-        return json(res, { ok: true, root, totals, tailwind });
+        return json(res, { ok: true, root, totals, tailwind, telemetry: !telemetry.disabled });
       }
 
       if (req.method === 'GET' && url.pathname === '/api/events') {
@@ -94,6 +99,7 @@ export function startServer({ root, port = 4100 }) {
           const id = nextId++;
           const write = applyTextEdit(root, body.loc, body.oldText, body.newText);
           remember(id, write);
+          telemetry.record('copy');
           broadcast({ type: 'tweak', id, kind: 'copy', status: 'done', tokens: 0, label: `copy: "${body.newText.slice(0, 40)}"`, ...recordSavings(0, 50) });
           return json(res, { ok: true, id });
         }
@@ -102,6 +108,7 @@ export function startServer({ root, port = 4100 }) {
           const id = nextId++;
           const write = applyClassEdit(root, body.loc, body.remove || [], body.add || []);
           remember(id, write);
+          telemetry.record('style');
           broadcast({ type: 'tweak', id, kind: 'style', status: 'done', tokens: 0, label: `style: ${(body.add || []).join(' ')}`, ...recordSavings(0, 50) });
           return json(res, { ok: true, id });
         }
@@ -113,6 +120,7 @@ export function startServer({ root, port = 4100 }) {
           const desc = Object.entries(body.styles || {})
             .map(([k, v]) => `${k}: ${v}`)
             .join(', ');
+          telemetry.record('style');
           broadcast({ type: 'tweak', id, kind: 'style', status: 'done', tokens: 0, label: `style: ${desc.slice(0, 50)}`, ...recordSavings(0, 50) });
           return json(res, { ok: true, id });
         }
@@ -126,6 +134,7 @@ export function startServer({ root, port = 4100 }) {
           const target = describeTarget(root, body.loc);
           const write = applyDeleteElement(root, body.loc);
           remember(id, write);
+          telemetry.record('delete');
           broadcast({ type: 'tweak', id, kind: 'delete', status: 'done', tokens: 0, label: `deleted <${target.tagName}>`, ...recordSavings(0, 50) });
           return json(res, { ok: true, id });
         }
@@ -146,6 +155,7 @@ export function startServer({ root, port = 4100 }) {
           const route = classify(body.instruction);
           const abs = path.resolve(root, file);
           remember(id, { abs, before: fs.readFileSync(abs, 'utf8') });
+          telemetry.record('nl');
           broadcast({ type: 'tweak', id, kind: route.kind, status: 'queued', model: route.model, label: body.instruction.slice(0, 60) });
           json(res, { ok: true, id, model: route.model, kind: route.kind });
 
@@ -212,6 +222,8 @@ export function startServer({ root, port = 4100 }) {
   });
   server.listen(port, () => {
     console.log(`[tweaklocal] daemon on http://localhost:${port} (root: ${root})`);
+    console.log('[tweaklocal] docs & updates → https://tweaklocal.dev');
+    if (telemetry.firstRun && !telemetry.disabled) console.log(DISCLOSURE);
   });
   return server;
 }

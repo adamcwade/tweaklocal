@@ -36,6 +36,8 @@
   .twk-chip{font-size:10.5px !important;padding:2px 6px !important}
   .twk-tray{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:auto}
   .twk-total{background:#064e3b;color:#a7f3d0;border-radius:8px;padding:6px 11px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px}
+  .twk-total a{color:#6ee7b7;margin-left:10px;text-decoration:underline;cursor:pointer}
+  .twk-total a:hover{color:#a7f3d0}
   .twk-tweak{background:#111827;color:#e5e7eb;border-radius:8px;padding:7px 11px;font-size:13px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px;overflow:hidden;text-overflow:ellipsis}
   .twk-dot{width:8px;height:8px;border-radius:50%;flex:none}
   .twk-dot.done{background:#10b981}.twk-dot.queued,.twk-dot.running{background:#f59e0b;animation:twk-pulse 1s infinite}.twk-dot.error{background:#ef4444}.twk-dot.reverted{background:#6b7280}
@@ -684,13 +686,19 @@
   root.appendChild(tray);
   const totalBar = el('div', 'twk-total');
   totalBar.style.display = 'none';
+  const totalText = el('span');
+  const reportLink = el('a', null, 'monthly report →');
+  reportLink.href = 'https://tweaklocal.dev/report';
+  reportLink.target = '_blank';
+  reportLink.rel = 'noopener';
+  totalBar.append(totalText, reportLink);
   tray.appendChild(totalBar);
   const tweaks = new Map();
 
   function showTotals(t) {
     if (!t || !t.count) return;
     totalBar.style.display = '';
-    totalBar.textContent = `≈ saved $${t.usd.toFixed(2)} · ${Math.round(t.ms / 1000)}s across ${t.count} tweak${t.count === 1 ? '' : 's'} (vs unscoped agent)`;
+    totalText.textContent = `≈ saved $${t.usd.toFixed(2)} · ${Math.round(t.ms / 1000)}s across ${t.count} tweak${t.count === 1 ? '' : 's'} (vs unscoped agent)`;
   }
 
   function addTweak(t) {

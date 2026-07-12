@@ -175,10 +175,26 @@
   function select(target) {
     finishTextEdit(false);
     const loc = target.getAttribute('data-twk');
-    state.selected = { el: target, loc };
+    state.selected = { el: target, loc, meta: null };
     selBox.style.display = 'block';
     renderPopover();
     reposition();
+    loadMeta();
+  }
+
+  // Source truth for the selection: the daemon's resolve tells us which text
+  // literals the element really has in JSX — the DOM can't (animation libs
+  // split text into spans, expressions render as text, etc).
+  async function loadMeta() {
+    const s = state.selected;
+    if (!s) return;
+    try {
+      const meta = await api('resolve', { loc: s.loc });
+      if (state.selected !== s) return; // selection changed meanwhile
+      s.meta = meta;
+      renderPopover();
+      reposition();
+    } catch { /* element not resolvable — leave popover as is */ }
   }
 
   function deselect() {
@@ -408,13 +424,43 @@
     head.append(el('span', 'twk-meta', s.loc));
     pop.appendChild(head);
 
-    if (hasEditableText(s.el)) {
-      const row = el('div', 'twk-row');
-      row.append(el('span', 'twk-label', 'Copy'));
-      const b = el('button', null, '✎ Edit text in place');
-      b.onclick = () => startTextEdit();
-      row.appendChild(b);
-      pop.appendChild(row);
+    // Copy lane, driven by the SOURCE text literals (s.meta.texts), not the
+    // DOM: animation libs split text into spans and expressions render as
+    // text, so DOM shape says nothing about what's editable in the JSX.
+    const literals = s.meta ? s.meta.texts : null;
+    if (literals && literals.length) {
+      if (hasEditableText(s.el) && literals.length === 1) {
+        // clean leaf → the nice path: edit directly in the page
+        const row = el('div', 'twk-row');
+        row.append(el('span', 'twk-label', 'Copy'));
+        const b = el('button', null, '✎ Edit text in place');
+        b.onclick = () => startTextEdit();
+        row.appendChild(b);
+        pop.appendChild(row);
+      } else {
+        // DOM is transformed (or several literals) → edit the source text here
+        for (const t of literals) {
+          const row = el('div', 'twk-row');
+          row.append(el('span', 'twk-label', 'Copy'));
+          const input = el('input');
+          input.value = t.value;
+          const save = el('button', null, '✓');
+          const commit = async () => {
+            const newText = input.value.trim();
+            if (!newText || newText === t.value) return;
+            try {
+              await api('edit-text', { loc: s.loc, oldText: t.value, newText });
+              setTimeout(() => { reposition(); loadMeta(); }, 350);
+            } catch (e) {
+              addTweak({ id: 'x' + Date.now(), status: 'error', label: `copy: ${e.message}` });
+            }
+          };
+          save.onclick = commit;
+          input.onkeydown = (e) => { if (e.key === 'Enter') commit(); e.stopPropagation(); };
+          row.append(input, save);
+          pop.appendChild(row);
+        }
+      }
     }
 
     // Deterministic style controls. Tailwind apps get class edits; everything
@@ -540,12 +586,14 @@
       return;
     }
     try {
-      await api('edit-text', { loc: state.selected.loc, oldText: ed.original, newText });
+      // prefer the source literal as oldText — the DOM may differ in whitespace
+      const literal = state.selected.meta?.texts?.[0]?.value ?? ed.original;
+      await api('edit-text', { loc: state.selected.loc, oldText: literal, newText });
     } catch (e) {
       ed.el.textContent = ed.original;
       addTweak({ id: 'x' + Date.now(), status: 'error', label: `copy: ${e.message}` });
     }
-    setTimeout(reposition, 350);
+    setTimeout(() => { reposition(); loadMeta(); }, 350);
   }
 
   // ---------- tray ----------

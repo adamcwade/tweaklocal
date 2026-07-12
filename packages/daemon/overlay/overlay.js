@@ -17,7 +17,9 @@
   .twk-outline{position:fixed;border:1.5px solid #6366f1;border-radius:3px;background:rgba(99,102,241,.08);pointer-events:none;transition:all .04s linear}
   .twk-outline.twk-selected{border-color:#10b981;background:rgba(16,185,129,.06)}
   .twk-badge{position:fixed;background:#312e81;color:#e0e7ff;font-size:11px;padding:2px 7px;border-radius:4px;pointer-events:none;white-space:nowrap;transform:translateY(-100%)}
-  .twk-pop-label{position:fixed;background:#10b981;color:#052e1b;font-size:12px;font-weight:600;padding:3px 10px;border-radius:8px 8px 0 0;pointer-events:none;white-space:nowrap;transform:translateY(-100%)}
+  .twk-pop-label{position:fixed;background:#10b981;color:#052e1b;font-size:13.8px;font-weight:700;padding:3px 10px;border-radius:8px 8px 0 0;pointer-events:none;white-space:nowrap;transform:translate(-50%,-100%);text-align:center}
+  .twk-delete-btn{position:fixed;width:24px;height:24px;border-radius:50%;background:#450a0a;color:#fca5a5;border:1.5px solid #7f1d1d;cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.35);transform:translate(50%,-50%)}
+  .twk-delete-btn:hover{background:#7f1d1d;color:#fecaca}
   .twk-pop{position:fixed;background:#111827;color:#f9fafb;border:1.5px solid #10b981;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);padding:8px;pointer-events:auto;display:flex;flex-direction:column;gap:6px;min-width:300px;max-width:340px;font-size:12px}
   .twk-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
   .twk-pop button{background:#374151;color:#f9fafb;border:none;border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer}
@@ -39,8 +41,6 @@
   .twk-tweak button{background:none;border:none;color:#818cf8;cursor:pointer;font-size:12.5px;padding:0}
   .twk-meta{color:#9ca3af}
   .twk-hint{position:fixed;left:14px;bottom:14px;background:#111827;color:#9ca3af;font-size:12.5px;padding:6px 11px;border-radius:6px;pointer-events:none}
-  .twk-danger{background:#450a0a !important;color:#fca5a5 !important}
-  .twk-danger:hover{background:#7f1d1d !important}
   [contenteditable="plaintext-only"],[contenteditable="true"]{outline:2px dashed #10b981;outline-offset:2px}
   @keyframes twk-pulse{50%{opacity:.4}}`;
 
@@ -183,6 +183,24 @@
   const popLabel = el('div', 'twk-pop-label');
   popLabel.style.display = 'none';
   root.appendChild(popLabel);
+  const deleteBtn = el('button', 'twk-delete-btn', '🗑');
+  deleteBtn.style.display = 'none';
+  deleteBtn.title = 'Delete element';
+  root.appendChild(deleteBtn);
+  deleteBtn.onclick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const sel = state.selected;
+    if (!sel || !document.contains(sel.el)) return;
+    sel.el.style.display = 'none'; // optimistic; HMR makes it real
+    deselect();
+    try {
+      await api('delete', { loc: sel.loc });
+    } catch (err) {
+      sel.el.style.display = '';
+      addTweak({ id: 'x' + Date.now(), status: 'error', label: `delete: ${err.message}` });
+    }
+  };
 
   function select(target) {
     finishTextEdit(false);
@@ -215,6 +233,7 @@
     selBox.style.display = 'none';
     pop.style.display = 'none';
     popLabel.style.display = 'none';
+    deleteBtn.style.display = 'none';
   }
 
   function reposition() {
@@ -234,7 +253,9 @@
     Object.assign(pop.style, { left: left + 'px', top: Math.max(top, 8 + labelH) + 'px' });
     popLabel.style.display = 'block';
     popLabel.textContent = shortLoc(s.loc);
-    Object.assign(popLabel.style, { left: left + 'px', top: pop.style.top });
+    Object.assign(popLabel.style, { left: (left + pop.offsetWidth / 2) + 'px', top: pop.style.top });
+    deleteBtn.style.display = 'flex';
+    Object.assign(deleteBtn.style, { left: r.right + 'px', top: r.top + 'px' });
   }
 
   // ---------- class tweaks ----------
@@ -584,23 +605,7 @@
     input.onkeydown = (e) => { if (e.key === 'Enter') send(); e.stopPropagation(); };
     nlRow.append(input, go);
     pop.appendChild(nlRow);
-
-    const actions = el('div', 'twk-row');
-    const del = el('button', 'twk-danger', '🗑 Delete element');
-    del.onclick = async () => {
-      const sel = state.selected;
-      if (!sel || !document.contains(sel.el)) return;
-      sel.el.style.display = 'none'; // optimistic; HMR makes it real
-      deselect();
-      try {
-        await api('delete', { loc: sel.loc });
-      } catch (e) {
-        sel.el.style.display = '';
-        addTweak({ id: 'x' + Date.now(), status: 'error', label: `delete: ${e.message}` });
-      }
-    };
-    actions.appendChild(del);
-    pop.appendChild(actions);
+    // delete lives as a floating icon on the element itself (deleteBtn)
   }
 
   // ---------- inline copy editing ----------

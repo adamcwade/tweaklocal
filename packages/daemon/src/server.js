@@ -136,7 +136,10 @@ export function startServer({ root, port = 4100 }) {
           const write = applyDeleteElement(root, body.loc);
           remember(id, write);
           telemetry.record('delete');
-          broadcast({ type: 'tweak', id, kind: 'delete', status: 'done', tokens: 0, label: `deleted <${target.tagName}>`, ...recordSavings(0, 50) });
+          const label = write.removedUsage
+            ? `removed <${write.removedUsage}> usage`
+            : `deleted <${target.tagName}>`;
+          broadcast({ type: 'tweak', id, kind: 'delete', status: 'done', tokens: 0, label, ...recordSavings(0, 50) });
           return json(res, { ok: true, id });
         }
 

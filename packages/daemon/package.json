@@ -1,17 +1,35 @@
 {
   "name": "tweaklocal",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Tweak your UI live in the browser and write the changes straight to source. Copy and Tailwind edits cost zero tokens; everything else routes to a right-sized model via headless claude.",
   "license": "MIT",
   "type": "module",
-  "bin": { "tweaklocal": "bin/tweaklocal.js" },
-  "scripts": { "start": "node bin/tweaklocal.js" },
-  "files": ["bin", "src", "overlay", "README.md"],
+  "bin": {
+    "tweaklocal": "bin/tweaklocal.js"
+  },
+  "scripts": {
+    "start": "node bin/tweaklocal.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "overlay",
+    "README.md"
+  ],
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
     "@babel/parser": "^7.26.0"
   },
-  "keywords": ["devtools", "tailwind", "visual-editor", "claude", "ai", "nextjs", "vite", "react"]
+  "keywords": [
+    "devtools",
+    "tailwind",
+    "visual-editor",
+    "claude",
+    "ai",
+    "nextjs",
+    "vite",
+    "react"
+  ]
 }

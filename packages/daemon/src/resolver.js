@@ -181,13 +181,9 @@ export function applyStyleEdit(root, loc, styles) {
   );
 }
 
-/**
- * Delete the element from source, consuming its whole line(s) when it sits
- * alone on them. Refuses (throws) if the removal would leave the file
- * unparseable — e.g. deleting a component's only root element.
- */
-export function applyDeleteElement(root, loc, { dryRun = false } = {}) {
-  const { abs, content, element, file } = loadTarget(root, loc);
+// Remove an element from its source string, consuming its whole line(s) when
+// it sits alone on them. Returns the new content, or null if unparseable.
+function removeElementFromContent(content, element, file) {
   let start = element.start;
   let end = element.end;
   const lineStart = content.lastIndexOf('\n', start - 1) + 1;
@@ -199,22 +195,127 @@ export function applyDeleteElement(root, loc, { dryRun = false } = {}) {
   const next = content.slice(0, start) + content.slice(end);
   try {
     parseSource(next, file);
+    return next;
   } catch {
-    // Almost always: this element is the ONLY thing its component (or a
-    // .map() callback) renders, so removing it would leave an empty
-    // `return ()` or `.map(() => ())` — invalid JS. Detect that specific,
-    // near-universal case to give an actionable message instead of a
-    // generic parse error.
-    const before = content.slice(0, start).trimEnd();
-    const soleReturn = /(return\s*\(?|=>\s*\(?)$/.test(before);
+    return null;
+  }
+}
+
+// If `element` is the sole rendered output of a NAMED component function,
+// return that component's name. Returns null when the innermost enclosing
+// function is an anonymous callback (e.g. a `.map()` list item) — those are
+// data-driven and belong in the model lane, not a usage removal.
+function soleReturnComponentName(ast, element) {
+  // innermost function whose span contains the element
+  let inner = null;
+  walk(ast, (n) => {
+    if (
+      n.type !== 'FunctionDeclaration' &&
+      n.type !== 'FunctionExpression' &&
+      n.type !== 'ArrowFunctionExpression'
+    ) return;
+    if (n.start <= element.start && n.end >= element.end) {
+      if (!inner || (n.end - n.start) < (inner.end - inner.start)) inner = n;
+    }
+  });
+  if (!inner) return null;
+
+  // named function declaration: function Foo() {}
+  if (inner.id && inner.id.name) return inner.id.name;
+
+  // arrow/function bound to a name: const Foo = () => {} / const Foo = function(){}
+  let name = null;
+  walk(ast, (n) => {
+    if (
+      n.type === 'VariableDeclarator' &&
+      n.init && n.init.start === inner.start && n.init.end === inner.end &&
+      n.id && n.id.type === 'Identifier'
+    ) name = n.id.name;
+  });
+  return name; // null if the innermost fn is an anonymous callback (map, etc.)
+}
+
+// Walk the project for JSX usages of <Name ...>. Returns [{file, element}].
+function findUsages(root, name) {
+  const usages = [];
+  const skip = new Set(['node_modules', '.next', '.git', 'dist', '.turbo']);
+  const stack = [root];
+  while (stack.length) {
+    const dir = stack.pop();
+    let entries;
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { continue; }
+    for (const e of entries) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) { if (!skip.has(e.name)) stack.push(full); continue; }
+      if (!/\.(jsx|tsx)$/.test(e.name)) continue;
+      let content, ast;
+      try {
+        content = fs.readFileSync(full, 'utf8');
+        if (!content.includes('<' + name)) continue; // cheap prefilter
+        ast = parseSource(content, e.name);
+      } catch { continue; }
+      walk(ast, (n) => {
+        if (n.type !== 'JSXElement') return;
+        const openName = n.openingElement.name;
+        if (openName.type === 'JSXIdentifier' && openName.name === name) {
+          usages.push({ file: path.relative(root, full), abs: full, content, element: n });
+        }
+      });
+    }
+  }
+  return usages;
+}
+
+/**
+ * Delete behavior:
+ *  - Normal element (has siblings / non-sole child): remove it in place.
+ *  - Sole return of a component: the element IS the component's whole output,
+ *    so "delete this" means remove the component's rendered *usage*. If the
+ *    component is used in exactly one place, remove that usage deterministically.
+ *    Otherwise refuse with an actionable message (ambiguous → model lane).
+ */
+export function applyDeleteElement(root, loc, { dryRun = false } = {}) {
+  const { abs, content, element, file } = loadTarget(root, loc);
+
+  const inPlace = removeElementFromContent(content, element, file);
+  if (inPlace !== null) {
+    if (dryRun) return { abs, before: content, after: inPlace, wouldWrite: false };
+    return writeChecked(abs, content, inPlace);
+  }
+
+  // Removing the element in place would break the file → it's the sole return.
+  const ast = parseSource(content, file);
+  const name = soleReturnComponentName(ast, element);
+  if (!name || !/^[A-Z]/.test(name)) {
+    // no resolvable component name (anonymous default, or a .map() list item)
     throw new Error(
-      soleReturn
-        ? "can't delete — it's the only thing this component (or list item) renders; deleting it would leave nothing to return. Describe the change instead (e.g. \"remove this from the list\") and it'll route through the model."
-        : 'deleting this element would break the file — describe the change instead'
+      "can't delete this in place — it's the only thing rendered here (likely a list item or an unnamed component). Describe the change instead (e.g. \"remove this from the list\") and it'll route through the model."
     );
   }
-  if (dryRun) return { abs, before: content, after: next, wouldWrite: false };
-  return writeChecked(abs, content, next);
+
+  const usages = findUsages(root, name).filter(
+    (u) => !(u.abs === abs && u.element.start === element.start && u.element.end === element.end)
+  );
+  if (usages.length === 0) {
+    throw new Error(
+      `can't find where <${name}> is used, so there's no usage to remove. Describe the change instead and it'll route through the model.`
+    );
+  }
+  if (usages.length > 1) {
+    throw new Error(
+      `<${name}> is used in ${usages.length} places — deleting one is ambiguous. Select the specific <${name}> instance you want removed, or describe the change.`
+    );
+  }
+
+  const usage = usages[0];
+  const removed = removeElementFromContent(usage.content, usage.element, usage.file);
+  if (removed === null) {
+    throw new Error(
+      `removing the <${name}> usage would break ${usage.file}. Describe the change instead.`
+    );
+  }
+  if (dryRun) return { abs: usage.abs, before: usage.content, after: removed, wouldWrite: false, removedUsage: name };
+  return { ...writeChecked(usage.abs, usage.content, removed), removedUsage: name };
 }
 
 /** Returns null if the file parses, else the parse error message. */

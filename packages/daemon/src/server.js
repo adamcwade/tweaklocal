@@ -30,6 +30,7 @@ function detectTailwind(root) {
 
 export function startServer({ root, port = 4100 }) {
   const undoStack = new Map(); // id -> { abs, before }
+  const running = new Map(); // id -> child process (for cancellation)
   const sseClients = new Set();
   let nextId = 1;
   const tailwind = detectTailwind(root);
@@ -148,6 +149,13 @@ export function startServer({ root, port = 4100 }) {
           return json(res, { ok: true });
         }
 
+        if (url.pathname === '/api/cancel') {
+          const child = running.get(String(body.id));
+          if (!child) return json(res, { ok: false, error: 'task not running' }, 404);
+          child.__cancel(); // kills the process; the nl handler restores the file
+          return json(res, { ok: true });
+        }
+
         if (url.pathname === '/api/nl') {
           const id = nextId++;
           const { file } = parseLoc(body.loc);
@@ -159,13 +167,29 @@ export function startServer({ root, port = 4100 }) {
           broadcast({ type: 'tweak', id, kind: route.kind, status: 'queued', model: route.model, label: body.instruction.slice(0, 60) });
           json(res, { ok: true, id, model: route.model, kind: route.kind });
 
+          const restore = () => {
+            const entry = undoStack.get(String(id));
+            if (entry) fs.writeFileSync(entry.abs, entry.before);
+          };
+
           const prompt = buildPrompt({ file, target, instruction: body.instruction, tailwind });
           const result = await runClaude({
             prompt,
             model: route.model,
             cwd: root,
             onEvent: (e) => broadcast({ type: 'tweak', id, ...e }),
+            onSpawn: (child) => running.set(String(id), child),
           });
+          running.delete(String(id));
+
+          // Cancelled mid-run: undo any partial edit and stop — no retry, no
+          // savings credit.
+          if (result.cancelled) {
+            restore();
+            undoStack.delete(String(id));
+            broadcast({ type: 'tweak', id, status: 'cancelled', model: route.model });
+            return;
+          }
 
           // The model's edit must leave the file parseable: retry once with
           // the parse error, then revert if it's still broken.
@@ -176,14 +200,21 @@ export function startServer({ root, port = 4100 }) {
               prompt: `Your previous edit to ${file} left it with a JSX/JS syntax error:\n${parseErr}\n\nFix ${file} so it parses cleanly while preserving the intended change: ${body.instruction}\nEdit ONLY that file.`,
               model: route.model,
               cwd: root,
+              onSpawn: (child) => running.set(String(id), child),
             });
+            running.delete(String(id));
+            if (retry.cancelled) {
+              restore();
+              undoStack.delete(String(id));
+              broadcast({ type: 'tweak', id, status: 'cancelled', model: route.model });
+              return;
+            }
             result.durationMs += retry.durationMs || 0;
             if (retry.costUSD) result.costUSD = (result.costUSD || 0) + retry.costUSD;
             parseErr = checkSyntax(root, file);
           }
           if (parseErr) {
-            const entry = undoStack.get(String(id));
-            fs.writeFileSync(entry.abs, entry.before);
+            restore();
             result.ok = false;
             result.error = `edit reverted — file was left unparseable: ${parseErr.slice(0, 120)}`;
           }

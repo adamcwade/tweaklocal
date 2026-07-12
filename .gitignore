@@ -3,3 +3,9 @@ dist/
 .tweaklocal/
 .DS_Store
 *.log
+
+.next/
+.turbo/
+*.tsbuildinfo
+
+.fastui/

@@ -36,7 +36,12 @@ export function buildPrompt({ file, target, instruction, tailwind = true }) {
   ].join('\n');
 }
 
-export function runClaude({ prompt, model, cwd, onEvent }) {
+/**
+ * Spawn a headless claude run. `onSpawn` receives the child process so the
+ * caller can register it for cancellation. If cancelled (child killed), the
+ * promise resolves with { ok: false, cancelled: true }.
+ */
+export function runClaude({ prompt, model, cwd, onEvent, onSpawn }) {
   return new Promise((resolve) => {
     const started = Date.now();
     const child = spawn(
@@ -53,14 +58,33 @@ export function runClaude({ prompt, model, cwd, onEvent }) {
         '--output-format',
         'json',
       ],
-      { cwd, env: { ...process.env, CLAUDE_CODE_ENTRYPOINT: undefined } }
+      // detached → the child leads its own process group, so cancelling can
+      // signal the whole group (claude + any tool subprocesses it spawns).
+      // Killing only the top process orphans children that keep stdio pipes
+      // open, which would stall the 'close' event and the restore that follows.
+      { cwd, env: { ...process.env, CLAUDE_CODE_ENTRYPOINT: undefined }, detached: true }
     );
+    let cancelled = false;
+    const signalGroup = (sig) => {
+      try { process.kill(-child.pid, sig); } // negative pid = process group
+      catch { try { child.kill(sig); } catch {} } // fall back to the single process
+    };
+    child.__cancel = () => {
+      cancelled = true;
+      signalGroup('SIGTERM');
+      setTimeout(() => { if (!child.killed) signalGroup('SIGKILL'); }, 1500).unref?.();
+    };
+    onSpawn?.(child);
     let out = '';
     let err = '';
     child.stdout.on('data', (d) => (out += d));
     child.stderr.on('data', (d) => (err += d));
     child.on('close', (code) => {
       const durationMs = Date.now() - started;
+      if (cancelled) {
+        resolve({ ok: false, cancelled: true, durationMs });
+        return;
+      }
       if (code !== 0) {
         resolve({ ok: false, error: err.trim() || `claude exited ${code}`, durationMs });
         return;

@@ -1,6 +1,6 @@
 {
   "name": "tweaklocal",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Tweak your UI live in the browser and write the changes straight to source. Copy and Tailwind edits cost zero tokens; everything else routes to a right-sized model via headless claude.",
   "license": "MIT",
   "type": "module",

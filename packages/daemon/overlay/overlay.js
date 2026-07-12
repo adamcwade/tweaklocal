@@ -40,7 +40,7 @@
   .twk-total a:hover{color:#a7f3d0}
   .twk-tweak{background:#111827;color:#e5e7eb;border-radius:8px;padding:7px 11px;font-size:13px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px;overflow:hidden;text-overflow:ellipsis}
   .twk-dot{width:8px;height:8px;border-radius:50%;flex:none}
-  .twk-dot.done{background:#10b981}.twk-dot.queued,.twk-dot.running{background:#f59e0b;animation:twk-pulse 1s infinite}.twk-dot.error{background:#ef4444}.twk-dot.reverted{background:#6b7280}
+  .twk-dot.done{background:#10b981}.twk-dot.queued,.twk-dot.running{background:#f59e0b;animation:twk-pulse 1s infinite}.twk-dot.error{background:#ef4444}.twk-dot.reverted,.twk-dot.cancelled{background:#6b7280}
   .twk-tweak button{background:none;border:none;color:#818cf8;cursor:pointer;font-size:12.5px;padding:0}
   .twk-meta{color:#9ca3af}
   .twk-hint{position:fixed;left:14px;bottom:14px;background:#111827;color:#9ca3af;font-size:12.5px;padding:6px 11px;border-radius:6px;pointer-events:none}
@@ -708,6 +708,13 @@
       row._dot = el('span', 'twk-dot');
       row._label = el('span', null, '');
       row._meta = el('span', 'twk-meta', '');
+      row._cancel = el('button', null, 'cancel');
+      row._cancel.style.display = 'none';
+      row._cancel.onclick = async () => {
+        try {
+          await api('cancel', { id: t.id });
+        } catch (e) { row._meta.textContent = e.message; }
+      };
       row._undo = el('button', null, 'undo');
       row._undo.style.display = 'none';
       row._undo.onclick = async () => {
@@ -716,7 +723,7 @@
           setTimeout(reposition, 350);
         } catch (e) { row._meta.textContent = e.message; }
       };
-      row.append(row._dot, row._label, row._meta, row._undo);
+      row.append(row._dot, row._label, row._meta, row._cancel, row._undo);
       tray.insertBefore(row, totalBar.nextSibling);
       tweaks.set(String(t.id), row);
       while (tray.children.length > 7) tray.lastChild.remove();
@@ -724,6 +731,8 @@
     if (t.label) row._label.textContent = t.label;
     if (t.status) {
       row._dot.className = 'twk-dot ' + t.status;
+      const inFlight = t.status === 'queued' || t.status === 'running';
+      row._cancel.style.display = inFlight ? '' : 'none';
       row._undo.style.display = t.status === 'done' && !String(t.id).startsWith('x') ? '' : 'none';
     }
     const bits = [];

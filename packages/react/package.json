@@ -1,15 +1,19 @@
 {
   "name": "@tweaklocal/react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dev-time JSX source stamping for TweakLocal — bundler-agnostic (Turbopack, webpack, Vite). Set jsxImportSource to \"@tweaklocal/react\" and every rendered element knows its source file:line.",
   "license": "MIT",
   "main": "index.js",
+  "types": "index.d.ts",
   "files": ["index.js", "jsx-runtime.js", "jsx-dev-runtime.js", "*.d.ts", "README.md"],
   "exports": {
-    ".": "./index.js",
-    "./jsx-runtime": "./jsx-runtime.js",
-    "./jsx-dev-runtime": "./jsx-dev-runtime.js",
+    ".": { "types": "./index.d.ts", "default": "./index.js" },
+    "./jsx-runtime": { "types": "./jsx-runtime.d.ts", "default": "./jsx-runtime.js" },
+    "./jsx-dev-runtime": { "types": "./jsx-dev-runtime.d.ts", "default": "./jsx-dev-runtime.js" },
     "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "peerDependencies": {
     "react": ">=18"

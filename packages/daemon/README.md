@@ -4,7 +4,20 @@ Tweak your UI live in the browser — the changes are written straight to your s
 
 - **Copy**: click any text, edit in place, Enter. Written to the JSX literal. 0 tokens.
 - **Style**: padding/margin per side, font sizes and colors from *your* design system tokens. Deterministic Tailwind class edits. 0 tokens.
-- **Anything else**: describe it — routed to a fast model for style/copy or a reasoning model for functionality (headless `claude -p`), scoped to the exact file your selection maps to.
+- **Anything else**: describe it — a layered router picks a model *and* an effort level sized to the request, then runs headless `claude -p` scoped to the exact file your selection maps to.
+
+## Model routing
+
+| Tier | What it covers | Model | Effort (by complexity) |
+|---|---|---|---|
+| 1 | Styles, copy, component tweaks, existing components | `claude-sonnet-5` | low / medium / high |
+| 2 | New logic & functionality (handlers, state, forms, data) | `claude-opus-4-8` | medium / high / xhigh |
+| 3 | Multi-feature or cross-cutting work | `claude-opus-4-8` | xhigh |
+| 3+ | Mission-critical (auth, payments, data, security) or very high complexity | `claude-fable-5` | high |
+
+Routing is layered (RouteLLM-style): deterministic lexicon + structure scoring first (<1ms, free); requests with no clear signal fall through to a Haiku classifier with structured output (~1–3s, ~$0.001). Inspect any routing decision without running it: `POST /api/classify {"instruction": "..."}`.
+
+Overrides: `TWEAKLOCAL_T1_MODEL`, `TWEAKLOCAL_T2_MODEL`, `TWEAKLOCAL_T3_MODEL`, `TWEAKLOCAL_T3_CRITICAL_MODEL`, and `TWEAKLOCAL_ROUTER=heuristic|hybrid|llm` (default `hybrid`).
 
 ## Quickstart (Next.js)
 

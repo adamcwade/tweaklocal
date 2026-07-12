@@ -736,7 +736,7 @@
       row._undo.style.display = t.status === 'done' && !String(t.id).startsWith('x') ? '' : 'none';
     }
     const bits = [];
-    if (t.model) bits.push(t.model);
+    if (t.model) bits.push(t.model.replace(/^claude-/, '') + (t.effort ? ` @ ${t.effort}` : ''));
     if (t.tokens === 0) bits.push('0 tokens');
     if (t.durationMs) bits.push((t.durationMs / 1000).toFixed(1) + 's');
     if (t.costUSD != null) bits.push('$' + t.costUSD.toFixed(3));

@@ -159,16 +159,23 @@ export function startServer({ root, port = 4100 }) {
           return json(res, { ok: true });
         }
 
+        if (url.pathname === '/api/classify') {
+          // dry-run the router: no file writes, no model edit run (the hybrid
+          // router may still consult the Haiku classifier on ambiguous input)
+          const route = await classify(body.instruction || '', { cwd: root });
+          return json(res, { ok: true, ...route });
+        }
+
         if (url.pathname === '/api/nl') {
           const id = nextId++;
           const { file } = parseLoc(body.loc);
           const target = describeTarget(root, body.loc);
-          const route = classify(body.instruction);
+          const route = await classify(body.instruction, { cwd: root });
           const abs = path.resolve(root, file);
           remember(id, { abs, before: fs.readFileSync(abs, 'utf8') });
           telemetry.record('nl');
-          broadcast({ type: 'tweak', id, kind: route.kind, status: 'queued', model: route.model, label: body.instruction.slice(0, 60) });
-          json(res, { ok: true, id, model: route.model, kind: route.kind });
+          broadcast({ type: 'tweak', id, kind: route.kind, status: 'queued', model: route.model, effort: route.effort, tier: route.tier, label: body.instruction.slice(0, 60) });
+          json(res, { ok: true, id, model: route.model, effort: route.effort, tier: route.tier, kind: route.kind });
 
           const restore = () => {
             const entry = undoStack.get(String(id));
@@ -179,6 +186,7 @@ export function startServer({ root, port = 4100 }) {
           const result = await runClaude({
             prompt,
             model: route.model,
+            effort: route.effort,
             cwd: root,
             onEvent: (e) => broadcast({ type: 'tweak', id, ...e }),
             onSpawn: (child) => running.set(String(id), child),
@@ -202,6 +210,7 @@ export function startServer({ root, port = 4100 }) {
             const retry = await runClaude({
               prompt: `Your previous edit to ${file} left it with a JSX/JS syntax error:\n${parseErr}\n\nFix ${file} so it parses cleanly while preserving the intended change: ${body.instruction}\nEdit ONLY that file.`,
               model: route.model,
+              effort: route.effort,
               cwd: root,
               onSpawn: (child) => running.set(String(id), child),
             });
@@ -227,6 +236,8 @@ export function startServer({ root, port = 4100 }) {
             id,
             status: result.ok ? 'done' : 'error',
             model: route.model,
+            effort: route.effort,
+            tier: route.tier,
             durationMs: result.durationMs,
             costUSD: result.costUSD,
             error: result.error,

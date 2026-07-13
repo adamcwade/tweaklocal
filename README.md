@@ -1,5 +1,9 @@
 # CmdZero
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/adamcwade/cmdzero/main/assets/hero.png" alt="CmdZero — live in-browser UI editing with a style panel, inline copy editing, and a token-savings banner" width="900">
+</p>
+
 Tweak your UI live in the browser. Select any element, edit copy in place, nudge styles, or describe a change — cmdzero knows exactly which source file and line each element came from, so most tweaks cost **zero tokens** and the rest run through a model sized to the job.
 
 ## How it works

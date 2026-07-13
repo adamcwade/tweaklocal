@@ -1,5 +1,9 @@
 # CmdZero
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/adamcwade/cmdzero/main/assets/hero.png" alt="CmdZero — live in-browser UI editing with a style panel, inline copy editing, and a token-savings banner" width="900">
+</p>
+
 Tweak your UI live in the browser — the changes are written straight to your source files.
 
 - **Copy**: click any text, edit in place, Enter. Written to the JSX literal. 0 tokens.

@@ -1,4 +1,4 @@
-# TweakLocal — Landing Page Copy
+# CmdZero — Landing Page Copy
 
 > Voice notes: written for frontend developers who already use AI coding agents. Direct, technical, lightly wry. No buzzwords, no exclamation points, every claim backed by a mechanism or a number. Headlines can be bold; body copy stays precise. "We/your" voice, present tense.
 
@@ -10,9 +10,9 @@
 # Stop describing your UI to an AI. Point at it.
 
 **Subheadline:**
-TweakLocal maps every element in your running app to its exact line of source. Click the thing, change the thing — copy and style edits land in your code instantly, with zero AI involved. The rest goes to a model sized for the job.
+CmdZero maps every element in your running app to its exact line of source. Click the thing, change the thing — copy and style edits land in your code instantly, with zero AI involved. The rest goes to a model sized for the job.
 
-**Primary CTA:** `npm i -D tweaklocal @tweaklocal/react` *(copy-to-clipboard button)*
+**Primary CTA:** `npm i -D cmdzero @cmdzero/react` *(copy-to-clipboard button)*
 
 **Secondary CTA:** Star on GitHub
 
@@ -36,7 +36,7 @@ You know this loop. You tell your agent "a bit more padding on the pricing card.
 
 You just paid twice for an edit you could describe with one keystroke — if your tools knew *which* card, in *which* file, on *which* line.
 
-TweakLocal knows. That's the whole product.
+CmdZero knows. That's the whole product.
 
 ---
 
@@ -46,26 +46,26 @@ TweakLocal knows. That's the whole product.
 
 **1. Install**
 ```sh
-npm i -D tweaklocal @tweaklocal/react
+npm i -D cmdzero @cmdzero/react
 ```
 
-**2. Point React's dev runtime at TweakLocal**
+**2. Point React's dev runtime at CmdZero**
 ```json
 // tsconfig.json or jsconfig.json
-{ "compilerOptions": { "jsxImportSource": "@tweaklocal/react" } }
+{ "compilerOptions": { "jsxImportSource": "@cmdzero/react" } }
 ```
 ```jsx
 // app/layout.tsx — at the end of <body>
-import { TweakLocalOverlay } from '@tweaklocal/react';
-<TweakLocalOverlay />
+import { CmdZeroOverlay } from '@cmdzero/react';
+<CmdZeroOverlay />
 ```
 
 **3. Run it next to your dev server**
 ```sh
-npx tweaklocal
+npx cmdzero
 ```
 
-Open your app. Press `⌘.` and click anything.
+Open your app. Press `⌘0` and click anything.
 
 *No bundler config. Works with Turbopack, webpack, and Vite — stamping happens in React's dev JSX runtime, so server components map too. Production builds get a passthrough: zero bytes, zero overhead.*
 
@@ -80,7 +80,7 @@ Click any text and edit it in place. Enter writes it to the JSX literal — the 
 Padding and margin per side. Font sizes and color swatches read from *your* Tailwind theme — the tokens your app actually uses, not a generic picker. Every change is a deterministic class edit in your source. **0 tokens.**
 
 ### Everything else: describe it, routed right
-"Make this button show a confirmation state when clicked." TweakLocal classifies the request — style and copy go to a fast model, functionality to a reasoning model — and runs it scoped to the one file your selection maps to. No repo search, no context bloat. It validates the edit still parses, retries once if not, and reverts rather than leave your app broken.
+"Make this button show a confirmation state when clicked." CmdZero classifies the request — style and copy go to a fast model, functionality to a reasoning model — and runs it scoped to the one file your selection maps to. No repo search, no context bloat. It validates the edit still parses, retries once if not, and reverts rather than leave your app broken.
 
 ---
 
@@ -93,20 +93,20 @@ Padding and margin per side. Font sizes and color swatches read from *your* Tail
 - **Dev-only by construction.** The stamp lives in React's development runtime; production builds import a passthrough.
 - **Scoped AI, when AI runs at all.** The model sees one file and your instruction — not your repo.
 - **A running savings counter** shows what each tweak would have cost through an unscoped agent. Watch it add up; that's your invoice not happening. *(Want the receipts? Get a monthly savings report — email capture, see below.)*
-- **Telemetry that announces itself.** Anonymous usage counts only — version, OS, tweak counts. Never code, paths, or prompts. Disclosed on first run, disabled with one env var (`TWEAKLOCAL_TELEMETRY=0`), and `DO_NOT_TRACK` is respected.
+- **Telemetry that announces itself.** Anonymous usage counts only — version, OS, tweak counts. Never code, paths, or prompts. Disclosed on first run, disabled with one env var (`CMDZERO_TELEMETRY=0`), and `DO_NOT_TRACK` is respected.
 
 ---
 
 ## FAQ
 
 **Does this replace my coding agent?**
-No — it feeds it. Claude Code does the heavy lifting for functionality changes; TweakLocal gives it surgical context instead of a treasure hunt. And for the majority of UI tweaks, no agent is needed at all.
+No — it feeds it. Claude Code does the heavy lifting for functionality changes; CmdZero gives it surgical context instead of a treasure hunt. And for the majority of UI tweaks, no agent is needed at all.
 
 **What do I need for the AI lane?**
 The Claude Code CLI on your PATH. Copy and style lanes work without it.
 
 **Does it work with my design system?**
-If your tokens are in CSS (Tailwind v4 theme variables today), TweakLocal reads them from the running page. Your swatches are your palette.
+If your tokens are in CSS (Tailwind v4 theme variables today), CmdZero reads them from the running page. Your swatches are your palette.
 
 **What about CSS Modules / styled-components?**
 Tailwind class edits are deterministic today; other styling systems route through the AI lane. Deeper attribution is on the roadmap.
@@ -115,7 +115,7 @@ Tailwind class edits are deterministic today; other styling systems route throug
 Next.js and Vite today — anything that emits React's standard dev JSX runtime. Remix/React Router support is planned.
 
 **What does telemetry collect?**
-Version, OS, and how many tweaks ran per lane — that's the whole payload. No code, no file paths, no prompts, no identity. It's disclosed the first time the daemon runs, `TWEAKLOCAL_TELEMETRY=0` turns it off forever, and we respect `DO_NOT_TRACK=1`. It exists so we know which frameworks to support next.
+Version, OS, and how many tweaks ran per lane — that's the whole payload. No code, no file paths, no prompts, no identity. It's disclosed the first time the daemon runs, `CMDZERO_TELEMETRY=0` turns it off forever, and we respect `DO_NOT_TRACK=1`. It exists so we know which frameworks to support next.
 
 ---
 
@@ -146,7 +146,7 @@ Preview-deploy tweaking: designers and PMs point at staging, their tweaks arrive
 
 **Placement 2 — the savings report (linked from the in-app tray):**
 > ### Your polish pass, itemized
-> TweakLocal already counts what every tweak would have cost through an unscoped agent. Get the monthly rollup: tweaks shipped, tokens avoided, dollars saved. One email a month, made of your own numbers.
+> CmdZero already counts what every tweak would have cost through an unscoped agent. Get the monthly rollup: tweaks shipped, tokens avoided, dollars saved. One email a month, made of your own numbers.
 > `[you@company.dev] [Send my savings report]`
 
 *(Annotation: placement 2 converts because the user arrives from the tray already looking at their number — the email is a continuation of value, not an interruption. Both feed one list, tagged by source.)*
@@ -158,17 +158,17 @@ Preview-deploy tweaking: designers and PMs point at staging, their tweaks arrive
 ### Your next padding tweak takes four milliseconds
 
 ```sh
-npm i -D tweaklocal @tweaklocal/react
+npm i -D cmdzero @cmdzero/react
 ```
 
-Press `⌘.` and click anything.
+Press `⌘0` and click anything.
 
 ---
 
 ## Annotations
 
 - **Headline** attacks the real pain (describing UI in prose) rather than claiming a category ("visual editor") that devs distrust. "Point at it" is the product's whole interaction model in three words.
-- **Zero-token claim leads everywhere** because it's the falsifiable differentiator — competitors are "AI editors"; TweakLocal's story is *less* AI, used precisely.
+- **Zero-token claim leads everywhere** because it's the falsifiable differentiator — competitors are "AI editors"; CmdZero's story is *less* AI, used precisely.
 - **Install command as CTA**: for dev tools, `npm i` converts better than "Get Started" — it's the first step of activation, not a signup wall.
 - **The 40-second story** mirrors voice-of-customer (agent round-trip frustration) and sets up the benchmark numbers as the punchline.
 - **Trust section** exists because the audience's #1 objection to anything that writes code is safety; every bullet names a mechanism, not a promise.
@@ -180,10 +180,10 @@ Press `⌘.` and click anything.
 - C: **Click the element. Ship the diff.** — mechanism-first, tighter, weaker on pain.
 
 ### CTA alternatives
-- A: `npm i -D tweaklocal @tweaklocal/react` (copy button) — activation-first.
+- A: `npm i -D cmdzero @cmdzero/react` (copy button) — activation-first.
 - B: **Watch the 20-second demo** — for cold traffic that needs proof before install.
 - C: **Tweak your first element** — docs-quickstart framing.
 
 ### Meta
-- **Title:** TweakLocal — point at your UI, ship the diff
+- **Title:** CmdZero — point at your UI, ship the diff
 - **Description:** Tweak your running app in the browser and write the changes straight to source. Copy and Tailwind edits cost zero tokens; everything else routes to a right-sized model. Next.js and Vite.

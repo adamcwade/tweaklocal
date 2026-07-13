@@ -29,7 +29,7 @@ export function loadTarget(root, loc) {
   const parsed = parseLoc(loc);
   const { line, col } = parsed;
   // Stamps come from two sources: the babel plugin (root-relative path,
-  // 0-based column) and the @tweaklocal/react dev runtime (absolute path,
+  // 0-based column) and the @cmdzero/react dev runtime (absolute path,
   // 1-based column). Normalize the path and match either column convention.
   const file = path.isAbsolute(parsed.file)
     ? path.relative(root, parsed.file)

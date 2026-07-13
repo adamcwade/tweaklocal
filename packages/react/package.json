@@ -1,7 +1,7 @@
 {
-  "name": "@tweaklocal/react",
-  "version": "0.1.1",
-  "description": "Dev-time JSX source stamping for TweakLocal — bundler-agnostic (Turbopack, webpack, Vite). Set jsxImportSource to \"@tweaklocal/react\" and every rendered element knows its source file:line.",
+  "name": "@cmdzero/react",
+  "version": "0.2.0",
+  "description": "Dev-time JSX source stamping for CmdZero — bundler-agnostic (Turbopack, webpack, Vite). Set jsxImportSource to \"@cmdzero/react\" and every rendered element knows its source file:line.",
   "license": "MIT",
   "main": "index.js",
   "types": "index.d.ts",
@@ -18,5 +18,5 @@
   "peerDependencies": {
     "react": ">=18"
   },
-  "keywords": ["tweaklocal", "jsx", "source-maps", "devtools", "nextjs"]
+  "keywords": ["cmdzero", "jsx", "source-maps", "devtools", "nextjs"]
 }

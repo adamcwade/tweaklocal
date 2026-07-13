@@ -1,4 +1,4 @@
-# TweakLocal
+# CmdZero
 
 Tweak your UI live in the browser — the changes are written straight to your source files.
 
@@ -20,28 +20,28 @@ Changes show live automatically — the overlay reloads the page (preserving scr
 
 Routing is layered (RouteLLM-style): deterministic lexicon + structure scoring first (<1ms, free); requests with no clear signal fall through to a Haiku classifier with structured output (~1–3s, ~$0.001). Inspect any routing decision without running it: `POST /api/classify {"instruction": "..."}`.
 
-Overrides: `TWEAKLOCAL_T1_MODEL`, `TWEAKLOCAL_T2_MODEL`, `TWEAKLOCAL_T3_MODEL`, `TWEAKLOCAL_T3_CRITICAL_MODEL`, and `TWEAKLOCAL_ROUTER=heuristic|hybrid|llm` (default `hybrid`).
+Overrides: `CMDZERO_T1_MODEL`, `CMDZERO_T2_MODEL`, `CMDZERO_T3_MODEL`, `CMDZERO_T3_CRITICAL_MODEL`, and `CMDZERO_ROUTER=heuristic|hybrid|llm` (default `hybrid`).
 
 ## Quickstart (Next.js)
 
 ```sh
-npm i -D tweaklocal @tweaklocal/react
+npm i -D cmdzero @cmdzero/react
 ```
 
 1. `jsconfig.json` / `tsconfig.json`:
    ```json
-   { "compilerOptions": { "jsxImportSource": "@tweaklocal/react" } }
+   { "compilerOptions": { "jsxImportSource": "@cmdzero/react" } }
    ```
 2. Root layout:
    ```jsx
-   import { TweakLocalOverlay } from '@tweaklocal/react';
-   // inside <body>: {children}<TweakLocalOverlay />
+   import { CmdZeroOverlay } from '@cmdzero/react';
+   // inside <body>: {children}<CmdZeroOverlay />
    ```
 3. Run the daemon next to your dev server, from the project root:
    ```sh
-   npx tweaklocal
+   npx cmdzero
    ```
-4. Open your app, press `⌘.`, click anything.
+4. Open your app, press `⌘0`, click anything.
 
 Works with Turbopack, webpack, and Vite — stamping happens in React's dev JSX runtime, not the bundler. Server components included. Production builds are untouched (the prod runtime is a passthrough).
 
@@ -52,12 +52,12 @@ The daemon sends anonymous usage telemetry: package version, node version, OS pl
 Opt out permanently:
 
 ```sh
-export TWEAKLOCAL_TELEMETRY=0   # or DO_NOT_TRACK=1 — both respected
+export CMDZERO_TELEMETRY=0   # or DO_NOT_TRACK=1 — both respected
 ```
 
 ## Options
 
-- `npx tweaklocal --port 4101` (+ `<TweakLocalOverlay origin="http://localhost:4101" />`)
-- `TWEAKLOCAL_FAST_MODEL` / `TWEAKLOCAL_SMART_MODEL` — model aliases for the router (default `haiku` / `sonnet`)
-- `TWEAKLOCAL_BASELINE_COST` / `TWEAKLOCAL_BASELINE_MS` — baseline for the savings counter
+- `npx cmdzero --port 4101` (+ `<CmdZeroOverlay origin="http://localhost:4101" />`)
+- `CMDZERO_FAST_MODEL` / `CMDZERO_SMART_MODEL` — model aliases for the router (default `haiku` / `sonnet`)
+- `CMDZERO_BASELINE_COST` / `CMDZERO_BASELINE_MS` — baseline for the savings counter
 - Natural-language tweaks require the [Claude Code CLI](https://claude.com/claude-code) (`claude`) on your PATH; copy/style lanes work without it.

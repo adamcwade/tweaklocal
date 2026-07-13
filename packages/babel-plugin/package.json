@@ -1,12 +1,12 @@
 {
-  "name": "@tweaklocal/babel-plugin",
+  "name": "@cmdzero/babel-plugin",
   "version": "0.0.1",
-  "description": "Build-time JSX source stamping for TweakLocal — a Babel plugin alternative to @tweaklocal/react for setups where changing jsxImportSource isn't an option.",
+  "description": "Build-time JSX source stamping for CmdZero — a Babel plugin alternative to @cmdzero/react for setups where changing jsxImportSource isn't an option.",
   "license": "MIT",
   "main": "index.js",
   "files": ["index.js", "package.json"],
   "peerDependencies": {
     "@babel/core": "^7.0.0"
   },
-  "keywords": ["tweaklocal", "babel-plugin", "jsx", "source-maps", "devtools"]
+  "keywords": ["cmdzero", "babel-plugin", "jsx", "source-maps", "devtools"]
 }

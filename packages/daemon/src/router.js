@@ -11,14 +11,14 @@ import { spawn } from 'node:child_process';
 // "Speed" within a tier is the claude CLI's --effort flag (low..max), scaled
 // by a complexity score. Layer 1 is lexicon+structure heuristics (<1ms, free);
 // when its signals are ambiguous, Layer 2 asks Haiku to classify via
-// --json-schema (~1-3s, ~$0.001). TWEAKLOCAL_ROUTER=heuristic|hybrid|llm.
+// --json-schema (~1-3s, ~$0.001). CMDZERO_ROUTER=heuristic|hybrid|llm.
 // ---------------------------------------------------------------------------
 
 const MODELS = {
-  t1: process.env.TWEAKLOCAL_T1_MODEL || process.env.TWEAKLOCAL_FAST_MODEL || 'claude-sonnet-5',
-  t2: process.env.TWEAKLOCAL_T2_MODEL || process.env.TWEAKLOCAL_SMART_MODEL || 'claude-opus-4-8',
-  t3: process.env.TWEAKLOCAL_T3_MODEL || 'claude-opus-4-8',
-  t3Critical: process.env.TWEAKLOCAL_T3_CRITICAL_MODEL || 'claude-fable-5',
+  t1: process.env.CMDZERO_T1_MODEL || process.env.CMDZERO_FAST_MODEL || 'claude-sonnet-5',
+  t2: process.env.CMDZERO_T2_MODEL || process.env.CMDZERO_SMART_MODEL || 'claude-opus-4-8',
+  t3: process.env.CMDZERO_T3_MODEL || 'claude-opus-4-8',
+  t3Critical: process.env.CMDZERO_T3_CRITICAL_MODEL || 'claude-fable-5',
 };
 
 // --- Layer 1 lexicons ------------------------------------------------------
@@ -157,7 +157,7 @@ function resolveRoute(tier, complexity, critical, source) {
  * ambiguous requests may consult the Haiku classifier (hybrid mode).
  */
 export async function classify(instruction, { cwd } = {}) {
-  const mode = process.env.TWEAKLOCAL_ROUTER || 'hybrid';
+  const mode = process.env.CMDZERO_ROUTER || 'hybrid';
   const h = heuristicTier(instruction);
   let tier = h.tier;
   let critical = h.critical;

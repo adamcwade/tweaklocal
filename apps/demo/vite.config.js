@@ -5,15 +5,15 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig(({ command }) => ({
   plugins: [
     react({
-      // TweakLocal stamping is dev-only: production builds skip Babel entirely.
+      // CmdZero stamping is dev-only: production builds skip Babel entirely.
       babel:
         command === 'serve'
-          ? { plugins: [['@tweaklocal/babel-plugin', { root: process.cwd() }]] }
+          ? { plugins: [['@cmdzero/babel-plugin', { root: process.cwd() }]] }
           : undefined,
     }),
     tailwindcss(),
     {
-      name: 'tweaklocal-overlay-inject',
+      name: 'cmdzero-overlay-inject',
       apply: 'serve',
       transformIndexHtml(html) {
         return {

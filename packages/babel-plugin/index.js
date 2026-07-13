@@ -2,13 +2,13 @@ const path = require('path');
 
 /**
  * Stamps every host JSX element (lowercase tag) with
- * data-twk="<relative file>:<line>:<column>" in dev builds.
+ * data-cz="<relative file>:<line>:<column>" in dev builds.
  * line is 1-based, column is 0-based — matching @babel/parser locs,
  * so the daemon can resolve a stamp back to the exact AST node.
  */
-module.exports = function tweaklocalSourceStamp({ types: t }) {
+module.exports = function cmdzeroSourceStamp({ types: t }) {
   return {
-    name: 'tweaklocal-source-stamp',
+    name: 'cmdzero-source-stamp',
     visitor: {
       JSXOpeningElement(nodePath, state) {
         const node = nodePath.node;
@@ -18,7 +18,7 @@ module.exports = function tweaklocalSourceStamp({ types: t }) {
         if (!t.isJSXIdentifier(name) || !/^[a-z]/.test(name.name)) return;
         if (
           node.attributes.some(
-            (a) => t.isJSXAttribute(a) && a.name && a.name.name === 'data-twk'
+            (a) => t.isJSXAttribute(a) && a.name && a.name.name === 'data-cz'
           )
         )
           return;
@@ -32,7 +32,7 @@ module.exports = function tweaklocalSourceStamp({ types: t }) {
 
         const stamp = `${rel}:${node.loc.start.line}:${node.loc.start.column}`;
         node.attributes.push(
-          t.jsxAttribute(t.jsxIdentifier('data-twk'), t.stringLiteral(stamp))
+          t.jsxAttribute(t.jsxIdentifier('data-cz'), t.stringLiteral(stamp))
         );
       },
     },

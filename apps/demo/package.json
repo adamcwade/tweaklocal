@@ -12,7 +12,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@tweaklocal/babel-plugin": "workspace:*",
+    "@cmdzero/babel-plugin": "workspace:*",
     "@tailwindcss/vite": "^4.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "tailwindcss": "^4.0.0",

@@ -1,10 +1,10 @@
-// TweakLocal overlay — injected into the app in dev. Vanilla JS, no deps.
+// CmdZero overlay — injected into the app in dev. Vanilla JS, no deps.
 (() => {
-  if (window.__TWEAKLOCAL__) return;
-  window.__TWEAKLOCAL__ = true;
+  if (window.__CMDZERO__) return;
+  window.__CMDZERO__ = true;
 
   const script = [...document.scripts].find((s) => /\/overlay\.js/.test(s.src));
-  const ORIGIN = window.TWEAKLOCAL_ORIGIN || (script ? new URL(script.src).origin : 'http://localhost:4100');
+  const ORIGIN = window.CMDZERO_ORIGIN || (script ? new URL(script.src).origin : 'http://localhost:4100');
 
   const SPACE_SCALE = ['0', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '5', '6', '7', '8', '9', '10', '11', '12', '14', '16', '20', '24'];
   const FONT_FALLBACK = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl', 'text-5xl', 'text-6xl', 'text-7xl'];
@@ -13,69 +13,69 @@
   const PX_FONT = [10, 11, 12, 13, 14, 15, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56, 64, 72, 88, 96];
 
   const css = `
-  #twk-root{position:fixed;inset:0;pointer-events:none;z-index:2147483000;font-family:ui-sans-serif,system-ui,sans-serif}
-  .twk-outline{position:fixed;border:1.5px solid #6366f1;border-radius:3px;background:rgba(99,102,241,.08);pointer-events:none;transition:all .04s linear}
-  .twk-outline.twk-selected{border-color:#10b981;background:rgba(16,185,129,.06)}
-  .twk-multi{position:fixed;border:1.5px solid #f59e0b;border-radius:3px;background:rgba(245,158,11,.10);pointer-events:none}
-  .twk-multibar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#111827;color:#f9fafb;border:1.5px solid #f59e0b;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4);padding:8px;pointer-events:auto;display:flex;gap:6px;align-items:center;font-size:12px;z-index:2147483001}
-  .twk-multibar input{background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:5px 8px;font-size:12px;outline:none;width:220px}
-  .twk-multibar button{background:#374151;color:#f9fafb;border:none;border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer}
-  .twk-multibar button.twk-danger{background:#dc2626}
-  .twk-multibar .twk-count{color:#fbbf24;font-weight:700}
-  .twk-badge{position:fixed;background:#312e81;color:#e0e7ff;font-size:11px;padding:2px 7px;border-radius:4px;pointer-events:none;white-space:nowrap;transform:translateY(-100%)}
-  .twk-pop-label{position:fixed;background:#10b981;color:#052e1b;font-size:13.8px;font-weight:700;padding:3px 10px;border-radius:8px 8px 0 0;pointer-events:none;white-space:nowrap;transform:translate(-50%,-100%);text-align:center}
-  .twk-delete-btn{position:fixed;width:22px;height:22px;border-radius:50%;background:#dc2626;color:#fff;border:none;cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-  .twk-movebar{position:fixed;display:flex;gap:2px;align-items:center;background:#111827;border:1px solid #6366f1;border-radius:7px;padding:2px;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,.45)}
-  .twk-movebar button{width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:#374151;color:#e5e7eb;border:none;border-radius:4px;cursor:pointer;padding:0;font-size:12px;line-height:1}
-  .twk-movebar button:hover{background:#6366f1}
-  .twk-grip{cursor:grab;color:#9ca3af;font-size:13px;padding:0 3px;user-select:none}
-  .twk-grip:active{cursor:grabbing}
-  .twk-drop{position:fixed;background:#6366f1;border-radius:2px;pointer-events:none;z-index:2147483400;box-shadow:0 0 6px rgba(99,102,241,.8)}
-  .twk-dragghost{position:fixed;pointer-events:none;z-index:2147483350;opacity:.5;outline:2px dashed #6366f1;border-radius:4px;background:rgba(99,102,241,.12)}
-  .twk-delete-btn:hover{background:#ef4444}
-  .twk-delete-btn svg{width:12px;height:12px;pointer-events:none}
-  .twk-pop{position:fixed;background:#111827;color:#f9fafb;border:1.5px solid #10b981;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);padding:8px;pointer-events:auto;display:flex;flex-direction:column;gap:6px;min-width:300px;max-width:340px;font-size:12px}
-  .twk-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-  .twk-pop button{background:#374151;color:#f9fafb;border:none;border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer}
-  .twk-pop button:hover{background:#4b5563}
-  .twk-pop button.twk-primary{background:#6366f1}
-  .twk-pop input{flex:1;background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:5px 8px;font-size:12px;outline:none}
-  .twk-pop select{background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:3px 4px;font-size:11.5px;outline:none}
-  .twk-label{color:#9ca3af;min-width:50px}
-  .twk-note{color:#fbbf24;font-size:11px;line-height:1.35;background:rgba(245,158,11,.1);border-radius:6px;padding:4px 7px}
-  .twk-note.twk-info{color:#93c5fd;background:rgba(59,130,246,.12)}
-  .twk-cur{color:#6ee7b7;font-size:11px;margin-left:auto}
-  .twk-swatches{display:flex;gap:4px;flex-wrap:wrap;max-height:96px;overflow-y:auto;padding:2px}
-  .twk-swatch{width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
-  .twk-swatch:hover{transform:scale(1.15)}
-  .twk-chip{font-size:10.5px !important;padding:2px 6px !important}
-  .twk-tray{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:auto}
-  .twk-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-  .twk-wrap.twk-expanded{max-height:calc(100vh - 90px);overflow-y:auto;overflow-x:hidden;padding:2px}
-  .twk-wrap:not(.twk-expanded) > .twk-tweak:nth-child(n+6){display:none}
-  .twk-fade{height:16px;width:160px;background:linear-gradient(to bottom,rgba(17,24,39,0),rgba(17,24,39,.55));pointer-events:none;margin-top:-10px}
-  .twk-history{background:#0b1220;color:#93c5fd;border:1px solid #263041;border-radius:8px;padding:4px 10px;font-size:11.5px;cursor:pointer;pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.3)}
-  .twk-history:hover{border-color:#6366f1}
-  .twk-total{background:#064e3b;color:#a7f3d0;border-radius:8px;padding:6px 11px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px}
-  .twk-total a{color:#6ee7b7;margin-left:10px;text-decoration:underline;cursor:pointer}
-  .twk-total a:hover{color:#a7f3d0}
-  .twk-tweak{background:#111827;color:#e5e7eb;border-radius:8px;padding:7px 11px;font-size:13px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px;overflow:hidden;text-overflow:ellipsis}
-  .twk-dot{width:8px;height:8px;border-radius:50%;flex:none}
-  .twk-dot.done{background:#10b981}.twk-dot.queued,.twk-dot.running{background:#f59e0b;animation:twk-pulse 1s infinite}.twk-dot.error{background:#ef4444}.twk-dot.reverted,.twk-dot.cancelled{background:#6b7280}
-  .twk-tweak button{background:none;border:none;color:#818cf8;cursor:pointer;font-size:12.5px;padding:0}
-  .twk-meta{color:#9ca3af}
-  .twk-hint{position:fixed;left:14px;bottom:14px;background:#111827;color:#9ca3af;font-size:12.5px;padding:6px 11px;border-radius:6px;pointer-events:none}
-  .twk-reload-toggle{position:fixed;left:14px;bottom:46px;background:#111827;color:#6ee7b7;border:1px solid #10b981;font-size:11.5px;padding:4px 9px;border-radius:6px;cursor:pointer;pointer-events:auto}
-  .twk-reload-toggle.off{color:#9ca3af;border-color:#374151}
+  #cz-root{position:fixed;inset:0;pointer-events:none;z-index:2147483000;font-family:ui-sans-serif,system-ui,sans-serif}
+  .cz-outline{position:fixed;border:1.5px solid #6366f1;border-radius:3px;background:rgba(99,102,241,.08);pointer-events:none;transition:all .04s linear}
+  .cz-outline.cz-selected{border-color:#10b981;background:rgba(16,185,129,.06)}
+  .cz-multi{position:fixed;border:1.5px solid #f59e0b;border-radius:3px;background:rgba(245,158,11,.10);pointer-events:none}
+  .cz-multibar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#111827;color:#f9fafb;border:1.5px solid #f59e0b;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4);padding:8px;pointer-events:auto;display:flex;gap:6px;align-items:center;font-size:12px;z-index:2147483001}
+  .cz-multibar input{background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:5px 8px;font-size:12px;outline:none;width:220px}
+  .cz-multibar button{background:#374151;color:#f9fafb;border:none;border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer}
+  .cz-multibar button.cz-danger{background:#dc2626}
+  .cz-multibar .cz-count{color:#fbbf24;font-weight:700}
+  .cz-badge{position:fixed;background:#312e81;color:#e0e7ff;font-size:11px;padding:2px 7px;border-radius:4px;pointer-events:none;white-space:nowrap;transform:translateY(-100%)}
+  .cz-pop-label{position:fixed;background:#10b981;color:#052e1b;font-size:13.8px;font-weight:700;padding:3px 10px;border-radius:8px 8px 0 0;pointer-events:none;white-space:nowrap;transform:translate(-50%,-100%);text-align:center}
+  .cz-delete-btn{position:fixed;width:22px;height:22px;border-radius:50%;background:#dc2626;color:#fff;border:none;cursor:pointer;pointer-events:auto;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .cz-movebar{position:fixed;display:flex;gap:2px;align-items:center;background:#111827;border:1px solid #6366f1;border-radius:7px;padding:2px;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+  .cz-movebar button{width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:#374151;color:#e5e7eb;border:none;border-radius:4px;cursor:pointer;padding:0;font-size:12px;line-height:1}
+  .cz-movebar button:hover{background:#6366f1}
+  .cz-grip{cursor:grab;color:#9ca3af;font-size:13px;padding:0 3px;user-select:none}
+  .cz-grip:active{cursor:grabbing}
+  .cz-drop{position:fixed;background:#6366f1;border-radius:2px;pointer-events:none;z-index:2147483400;box-shadow:0 0 6px rgba(99,102,241,.8)}
+  .cz-dragghost{position:fixed;pointer-events:none;z-index:2147483350;opacity:.5;outline:2px dashed #6366f1;border-radius:4px;background:rgba(99,102,241,.12)}
+  .cz-delete-btn:hover{background:#ef4444}
+  .cz-delete-btn svg{width:12px;height:12px;pointer-events:none}
+  .cz-pop{position:fixed;background:#111827;color:#f9fafb;border:1.5px solid #10b981;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);padding:8px;pointer-events:auto;display:flex;flex-direction:column;gap:6px;min-width:300px;max-width:340px;font-size:12px}
+  .cz-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .cz-pop button{background:#374151;color:#f9fafb;border:none;border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer}
+  .cz-pop button:hover{background:#4b5563}
+  .cz-pop button.cz-primary{background:#6366f1}
+  .cz-pop input{flex:1;background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:5px 8px;font-size:12px;outline:none}
+  .cz-pop select{background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:3px 4px;font-size:11.5px;outline:none}
+  .cz-label{color:#9ca3af;min-width:50px}
+  .cz-note{color:#fbbf24;font-size:11px;line-height:1.35;background:rgba(245,158,11,.1);border-radius:6px;padding:4px 7px}
+  .cz-note.cz-info{color:#93c5fd;background:rgba(59,130,246,.12)}
+  .cz-cur{color:#6ee7b7;font-size:11px;margin-left:auto}
+  .cz-swatches{display:flex;gap:4px;flex-wrap:wrap;max-height:96px;overflow-y:auto;padding:2px}
+  .cz-swatch{width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
+  .cz-swatch:hover{transform:scale(1.15)}
+  .cz-chip{font-size:10.5px !important;padding:2px 6px !important}
+  .cz-tray{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:auto}
+  .cz-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .cz-wrap.cz-expanded{max-height:calc(100vh - 90px);overflow-y:auto;overflow-x:hidden;padding:2px}
+  .cz-wrap:not(.cz-expanded) > .cz-tweak:nth-child(n+6){display:none}
+  .cz-fade{height:16px;width:160px;background:linear-gradient(to bottom,rgba(17,24,39,0),rgba(17,24,39,.55));pointer-events:none;margin-top:-10px}
+  .cz-history{background:#0b1220;color:#93c5fd;border:1px solid #263041;border-radius:8px;padding:4px 10px;font-size:11.5px;cursor:pointer;pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+  .cz-history:hover{border-color:#6366f1}
+  .cz-total{background:#064e3b;color:#a7f3d0;border-radius:8px;padding:6px 11px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px}
+  .cz-total a{color:#6ee7b7;margin-left:10px;text-decoration:underline;cursor:pointer}
+  .cz-total a:hover{color:#a7f3d0}
+  .cz-tweak{background:#111827;color:#e5e7eb;border-radius:8px;padding:7px 11px;font-size:13px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px;overflow:hidden;text-overflow:ellipsis}
+  .cz-dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .cz-dot.done{background:#10b981}.cz-dot.queued,.cz-dot.running{background:#f59e0b;animation:cz-pulse 1s infinite}.cz-dot.error{background:#ef4444}.cz-dot.reverted,.cz-dot.cancelled{background:#6b7280}
+  .cz-tweak button{background:none;border:none;color:#818cf8;cursor:pointer;font-size:12.5px;padding:0}
+  .cz-meta{color:#9ca3af}
+  .cz-hint{position:fixed;left:14px;bottom:14px;background:#111827;color:#9ca3af;font-size:12.5px;padding:6px 11px;border-radius:6px;pointer-events:none}
+  .cz-reload-toggle{position:fixed;left:14px;bottom:46px;background:#111827;color:#6ee7b7;border:1px solid #10b981;font-size:11.5px;padding:4px 9px;border-radius:6px;cursor:pointer;pointer-events:auto}
+  .cz-reload-toggle.off{color:#9ca3af;border-color:#374151}
   [contenteditable="plaintext-only"],[contenteditable="true"]{outline:2px dashed #10b981;outline-offset:2px}
-  @keyframes twk-pulse{50%{opacity:.4}}`;
+  @keyframes cz-pulse{50%{opacity:.4}}`;
 
   const style = document.createElement('style');
   style.textContent = css;
   document.head.appendChild(style);
 
   const root = document.createElement('div');
-  root.id = 'twk-root';
+  root.id = 'cz-root';
   document.body.appendChild(root);
 
   const state = {
@@ -88,7 +88,7 @@
     multi: [], // [{ el, loc }] shift-click multi-selection
     autoReload: true, // seamlessly reload after a write so changes always show live
   };
-  try { state.autoReload = localStorage.getItem('twk-autoreload') !== '0'; } catch { /* no storage */ }
+  try { state.autoReload = localStorage.getItem('cz-autoreload') !== '0'; } catch { /* no storage */ }
 
   // Stack of undoable tweak ids (LIFO) for ⌘Z / Ctrl-Z global undo.
   const undoStack = [];
@@ -174,7 +174,7 @@
   // Fallback palette: the colors actually rendered on the page right now.
   function harvestPageColors() {
     const seen = new Map();
-    const els = document.querySelectorAll('[data-twk]');
+    const els = document.querySelectorAll('[data-cz]');
     for (const e of [...els].slice(0, 400)) {
       const cs = getComputedStyle(e);
       for (const v of [cs.color, cs.backgroundColor]) {
@@ -189,8 +189,8 @@
   }
 
   // ---------- hover ----------
-  const hoverBox = el('div', 'twk-outline');
-  const hoverBadge = el('div', 'twk-badge');
+  const hoverBox = el('div', 'cz-outline');
+  const hoverBadge = el('div', 'cz-badge');
   hoverBox.style.display = hoverBadge.style.display = 'none';
   root.append(hoverBox, hoverBadge);
 
@@ -202,21 +202,21 @@
     }
     hoverBox.style.display = hoverBadge.style.display = 'block';
     const r = positionBox(hoverBox, target);
-    hoverBadge.textContent = `<${target.tagName.toLowerCase()}> ${shortLoc(target.getAttribute('data-twk'))}`;
+    hoverBadge.textContent = `<${target.tagName.toLowerCase()}> ${shortLoc(target.getAttribute('data-cz'))}`;
     Object.assign(hoverBadge.style, { left: r.left + 'px', top: Math.max(r.top - 4, 16) + 'px' });
   }
 
   // ---------- selection ----------
-  const selBox = el('div', 'twk-outline twk-selected');
+  const selBox = el('div', 'cz-outline cz-selected');
   selBox.style.display = 'none';
   root.appendChild(selBox);
-  const pop = el('div', 'twk-pop');
+  const pop = el('div', 'cz-pop');
   pop.style.display = 'none';
   root.appendChild(pop);
-  const popLabel = el('div', 'twk-pop-label');
+  const popLabel = el('div', 'cz-pop-label');
   popLabel.style.display = 'none';
   root.appendChild(popLabel);
-  const deleteBtn = el('button', 'twk-delete-btn');
+  const deleteBtn = el('button', 'cz-delete-btn');
   deleteBtn.innerHTML =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/></svg>';
   deleteBtn.style.display = 'none';
@@ -226,7 +226,7 @@
   // of a given instance tells the daemon WHICH data item it is (list items
   // render in array order).
   function instanceIndex(elm, loc) {
-    const instances = [...document.querySelectorAll(`[data-twk="${CSS.escape(loc)}"]`)];
+    const instances = [...document.querySelectorAll(`[data-cz="${CSS.escape(loc)}"]`)];
     const i = instances.indexOf(elm);
     return i >= 0 ? i : undefined;
   }
@@ -258,8 +258,8 @@
   };
 
   // ---------- reorder / move ----------
-  const moveBar = el('div', 'twk-movebar');
-  const grip = el('span', 'twk-grip', '⠿');
+  const moveBar = el('div', 'cz-movebar');
+  const grip = el('span', 'cz-grip', '⠿');
   grip.title = 'Drag to reorder';
   const btnPrev = el('button');
   const btnNext = el('button');
@@ -296,13 +296,13 @@
 
   // The peers a drag reorders among, and the dragged element's index in them.
   function dragPeers(elm, loc) {
-    const instances = [...document.querySelectorAll(`[data-twk="${CSS.escape(loc)}"]`)];
+    const instances = [...document.querySelectorAll(`[data-cz="${CSS.escape(loc)}"]`)];
     if (instances.length > 1 && instances.includes(elm)) return { kind: 'map', peers: instances };
-    const sibs = [...(elm.parentElement?.children || [])].filter((c) => c.nodeType === 1 && c.hasAttribute && c.hasAttribute('data-twk'));
+    const sibs = [...(elm.parentElement?.children || [])].filter((c) => c.nodeType === 1 && c.hasAttribute && c.hasAttribute('data-cz'));
     return { kind: 'siblings', peers: sibs.length > 1 ? sibs : [elm] };
   }
 
-  const dropLine = el('div', 'twk-drop');
+  const dropLine = el('div', 'cz-drop');
   dropLine.style.display = 'none';
   root.appendChild(dropLine);
 
@@ -355,10 +355,10 @@
 
   function select(target) {
     finishTextEdit(false);
-    const loc = target.getAttribute('data-twk');
+    const loc = target.getAttribute('data-cz');
     // How many rendered elements map to this same source line — i.e. how many
     // instances a shared-source edit (style/functionality) will change.
-    const instances = document.querySelectorAll(`[data-twk="${CSS.escape(loc)}"]`).length;
+    const instances = document.querySelectorAll(`[data-cz="${CSS.escape(loc)}"]`).length;
     state.selected = { el: target, loc, meta: null, instances };
     selBox.style.display = 'block';
     renderPopover();
@@ -393,12 +393,12 @@
 
   // ---------- multi-select (shift-click) ----------
   const multiBoxes = []; // pooled outline divs
-  const multiBar = el('div', 'twk-multibar');
+  const multiBar = el('div', 'cz-multibar');
   multiBar.style.display = 'none';
   root.appendChild(multiBar);
 
   function toggleMulti(target) {
-    const loc = target.getAttribute('data-twk');
+    const loc = target.getAttribute('data-cz');
     const i = state.multi.findIndex((m) => m.el === target);
     if (i >= 0) state.multi.splice(i, 1);
     else {
@@ -419,7 +419,7 @@
 
   function positionMulti() {
     state.multi.forEach((m, i) => {
-      if (!multiBoxes[i]) { multiBoxes[i] = el('div', 'twk-multi'); root.appendChild(multiBoxes[i]); }
+      if (!multiBoxes[i]) { multiBoxes[i] = el('div', 'cz-multi'); root.appendChild(multiBoxes[i]); }
       const box = multiBoxes[i];
       if (!document.contains(m.el)) { box.style.display = 'none'; return; }
       box.style.display = 'block';
@@ -434,16 +434,16 @@
     if (!state.multi.length) { multiBar.style.display = 'none'; return; }
     multiBar.style.display = 'flex';
     multiBar.textContent = '';
-    multiBar.append(el('span', 'twk-count', String(state.multi.length)));
+    multiBar.append(el('span', 'cz-count', String(state.multi.length)));
     multiBar.append(el('span', null, 'selected'));
     multiInput = el('input');
     multiInput.placeholder = 'Describe a change for all…';
     multiInput.value = multiBar._draft || '';
     multiInput.oninput = () => { multiBar._draft = multiInput.value; };
     multiInput.onkeydown = (e) => { if (e.key === 'Enter') applyMultiNL(); e.stopPropagation(); };
-    const apply = el('button', 'twk-primary', 'Apply');
+    const apply = el('button', 'cz-primary', 'Apply');
     apply.onclick = applyMultiNL;
-    const del = el('button', 'twk-danger', 'Delete all');
+    const del = el('button', 'cz-danger', 'Delete all');
     del.onclick = deleteMulti;
     const clear = el('button', null, 'Clear');
     clear.onclick = clearMulti;
@@ -487,7 +487,7 @@
     if (!s) return;
     if (!document.contains(s.el)) {
       // HMR replaced the node — re-acquire by stamp
-      const again = document.querySelector(`[data-twk="${CSS.escape(s.loc)}"]`);
+      const again = document.querySelector(`[data-cz="${CSS.escape(s.loc)}"]`);
       if (!again) return deselect();
       s.el = again;
     }
@@ -624,15 +624,15 @@
 
   function spacingRowPx(label, cssBase) {
     const s = state.selected;
-    const row = el('div', 'twk-row');
-    row.append(el('span', 'twk-label', label));
+    const row = el('div', 'cz-row');
+    row.append(el('span', 'cz-label', label));
     const sideSel = el('select');
     for (const [name, v] of [['All', ''], ['Top', 'Top'], ['Right', 'Right'], ['Bottom', 'Bottom'], ['Left', 'Left']]) {
       const o = el('option', null, name);
       o.value = v;
       sideSel.appendChild(o);
     }
-    const cur = el('span', 'twk-cur');
+    const cur = el('span', 'cz-cur');
     const show = () => {
       const prop = cssBase + (sideSel.value || 'Top');
       cur.textContent = Math.round(parseFloat(getComputedStyle(s.el)[prop]) || 0) + 'px';
@@ -662,9 +662,9 @@
 
   function fontRowPx() {
     const s = state.selected;
-    const row = el('div', 'twk-row');
-    row.append(el('span', 'twk-label', 'Font'));
-    const cur = el('span', 'twk-cur', Math.round(parseFloat(getComputedStyle(s.el).fontSize)) + 'px');
+    const row = el('div', 'cz-row');
+    row.append(el('span', 'cz-label', 'Font'));
+    const cur = el('span', 'cz-cur', Math.round(parseFloat(getComputedStyle(s.el).fontSize)) + 'px');
     const bump = (dir) => {
       const current = parseFloat(getComputedStyle(s.el).fontSize) || 16;
       const next = pxStep(current, PX_FONT, dir);
@@ -708,8 +708,8 @@
 
   function spacingRow(label, base) {
     const s = state.selected;
-    const row = el('div', 'twk-row');
-    row.append(el('span', 'twk-label', label));
+    const row = el('div', 'cz-row');
+    row.append(el('span', 'cz-label', label));
     const sideSel = el('select');
     for (const [name, v] of [['All', ''], ['Top', 't'], ['Right', 'r'], ['Bottom', 'b'], ['Left', 'l']]) {
       const o = el('option', null, name);
@@ -722,7 +722,7 @@
     plus.onclick = () => applyClassTweak(spacingStep(s.el, base, sideSel.value, +1), label);
     row.append(sideSel, minus, plus);
     const cur = classList(s.el).filter((c) => new RegExp(`^${base}[trbl]?-`).test(c)).join(' ');
-    if (cur) row.append(el('span', 'twk-cur', cur));
+    if (cur) row.append(el('span', 'cz-cur', cur));
     return row;
   }
 
@@ -738,7 +738,7 @@
     // Copy is the exception — it must stay on this one instance (below).
     const shared = s.instances > 1;
     if (shared) {
-      pop.appendChild(el('div', 'twk-note twk-info', `Reused component — ${s.instances} instances. Style & functionality changes apply to all of them.`));
+      pop.appendChild(el('div', 'cz-note cz-info', `Reused component — ${s.instances} instances. Style & functionality changes apply to all of them.`));
     }
 
     // Copy lane, driven by the SOURCE text literals (s.meta.texts), not the
@@ -749,7 +749,7 @@
       // The text literal is shared by every instance, so editing it here would
       // change all of them — which is not what a copy edit should do. Keep copy
       // local: block the in-place edit and point to the per-instance route.
-      pop.appendChild(el('div', 'twk-note', 'Copy here is shared across all instances — editing it would change every one. To change just this instance, make its text a prop/data value (describe it below and it\'ll route through the model).'));
+      pop.appendChild(el('div', 'cz-note', 'Copy here is shared across all instances — editing it would change every one. To change just this instance, make its text a prop/data value (describe it below and it\'ll route through the model).'));
     } else if (literals && literals.length) {
       // In-place editing only when the single literal IS the element's whole
       // text (animation-split DOM still qualifies — same text, different
@@ -758,8 +758,8 @@
       const wholeText =
         literals.length === 1 && literals[0].value.trim() === s.el.textContent.trim();
       if (wholeText) {
-        const row = el('div', 'twk-row');
-        row.append(el('span', 'twk-label', 'Copy'));
+        const row = el('div', 'cz-row');
+        row.append(el('span', 'cz-label', 'Copy'));
         const b = el('button', null, '✎ Edit text in place');
         b.onclick = () => startTextEdit();
         row.appendChild(b);
@@ -767,8 +767,8 @@
       } else {
         // DOM is transformed (or several literals) → edit the source text here
         for (const t of literals) {
-          const row = el('div', 'twk-row');
-          row.append(el('span', 'twk-label', 'Copy'));
+          const row = el('div', 'cz-row');
+          row.append(el('span', 'cz-label', 'Copy'));
           const input = el('input');
           input.value = t.value;
           const save = el('button', null, '✓');
@@ -797,15 +797,15 @@
     if (tw) {
       pop.appendChild(spacingRow('Padding', 'p'));
       pop.appendChild(spacingRow('Margin', 'm'));
-      const fontRow = el('div', 'twk-row');
-      fontRow.append(el('span', 'twk-label', 'Font'));
+      const fontRow = el('div', 'cz-row');
+      fontRow.append(el('span', 'cz-label', 'Font'));
       const fMinus = el('button', null, 'A−');
       const fPlus = el('button', null, 'A+');
       fMinus.onclick = () => applyClassTweak(fontStep(s.el, -1), 'font');
       fPlus.onclick = () => applyClassTweak(fontStep(s.el, +1), 'font');
       fontRow.append(fMinus, fPlus);
       const curFont = classList(s.el).find((c) => readTheme().textSizes.includes(c));
-      fontRow.append(el('span', 'twk-cur', curFont || 'inherited'));
+      fontRow.append(el('span', 'cz-cur', curFont || 'inherited'));
       pop.appendChild(fontRow);
     } else {
       pop.appendChild(spacingRowPx('Padding', 'padding'));
@@ -814,8 +814,8 @@
     }
 
     // property editor
-    const propRow = el('div', 'twk-row');
-    propRow.append(el('span', 'twk-label', 'Style'));
+    const propRow = el('div', 'cz-row');
+    propRow.append(el('span', 'cz-label', 'Style'));
     const propSel = el('select');
     propSel.appendChild(el('option', null, 'Choose property…'));
     for (const name of Object.keys(tw ? PROPS : STYLE_PROPS)) {
@@ -825,7 +825,7 @@
     }
     propRow.appendChild(propSel);
     pop.appendChild(propRow);
-    const swatches = el('div', 'twk-swatches');
+    const swatches = el('div', 'cz-swatches');
     pop.appendChild(swatches);
     propSel.onchange = () => {
       swatches.textContent = '';
@@ -835,11 +835,11 @@
         if (tw) {
           const { colors, fromDS } = readTheme();
           if (!fromDS) {
-            swatches.append(el('span', 'twk-meta', 'no design-system colors found in page CSS'));
+            swatches.append(el('span', 'cz-meta', 'no design-system colors found in page CSS'));
             return;
           }
           for (const c of colors) {
-            const b = el('button', 'twk-swatch');
+            const b = el('button', 'cz-swatch');
             b.style.background = c.value;
             b.title = `${p.prefix}-${c.name}`;
             b.onclick = () => applyClassTweak(propChange(s.el, propSel.value, `${p.prefix}-${c.name}`), propSel.value);
@@ -851,7 +851,7 @@
           const { varColors } = readTheme();
           const palette = varColors.length ? varColors.slice(0, 48) : harvestPageColors();
           for (const c of palette) {
-            const b = el('button', 'twk-swatch');
+            const b = el('button', 'cz-swatch');
             b.style.background = c.value;
             b.title = c.name;
             b.onclick = () => applyStyleProp(propSel.value, c.apply);
@@ -860,7 +860,7 @@
         }
       } else {
         p.options.forEach((opt, i) => {
-          const b = el('button', 'twk-chip', p.labels ? p.labels[i] : opt);
+          const b = el('button', 'cz-chip', p.labels ? p.labels[i] : opt);
           b.onclick = () =>
             tw
               ? applyClassTweak(propChange(s.el, propSel.value, opt), propSel.value)
@@ -871,10 +871,10 @@
       reposition();
     };
 
-    const nlRow = el('div', 'twk-row');
+    const nlRow = el('div', 'cz-row');
     const input = el('input');
     input.placeholder = 'Describe a change…';
-    const go = el('button', 'twk-primary', 'Go');
+    const go = el('button', 'cz-primary', 'Go');
     const send = async () => {
       const instruction = input.value.trim();
       if (!instruction) return;
@@ -893,8 +893,8 @@
     pop.appendChild(nlRow);
 
     // Model picker: Auto (router) or a forced tier.
-    const modelRow = el('div', 'twk-row');
-    modelRow.append(el('span', 'twk-label', 'Model'));
+    const modelRow = el('div', 'cz-row');
+    modelRow.append(el('span', 'cz-label', 'Model'));
     const modelSel = el('select');
     for (const [label, value] of [['Auto (routed)', 'auto'], ['Sonnet', 'claude-sonnet-5'], ['Opus', 'claude-opus-4-8'], ['Fable', 'claude-fable-5']]) {
       const o = el('option', null, label);
@@ -962,13 +962,13 @@
   }
 
   // ---------- tray ----------
-  const tray = el('div', 'twk-tray');
+  const tray = el('div', 'cz-tray');
   root.appendChild(tray);
-  const totalBar = el('div', 'twk-total');
+  const totalBar = el('div', 'cz-total');
   totalBar.style.display = 'none';
   const totalText = el('span');
   const reportLink = el('a', null, 'monthly report →');
-  reportLink.href = 'https://tweaklocal.dev/report';
+  reportLink.href = 'https://cmdzero.dev/report';
   reportLink.target = '_blank';
   reportLink.rel = 'noopener';
   totalBar.append(totalText, reportLink);
@@ -976,23 +976,23 @@
   // Alerts live in their own wrap so history can collapse independently of the
   // savings bar. Newest is inserted at the top; the 5 newest stay visible and
   // older ones fold behind an expander (fades at the bottom).
-  const tweaksWrap = el('div', 'twk-wrap');
+  const tweaksWrap = el('div', 'cz-wrap');
   tray.appendChild(tweaksWrap);
-  const fade = el('div', 'twk-fade');
+  const fade = el('div', 'cz-fade');
   fade.style.display = 'none';
   tray.appendChild(fade);
-  const historyChip = el('div', 'twk-history');
+  const historyChip = el('div', 'cz-history');
   historyChip.style.display = 'none';
-  historyChip.onclick = () => { tweaksWrap.classList.toggle('twk-expanded'); updateHistoryUI(); };
+  historyChip.onclick = () => { tweaksWrap.classList.toggle('cz-expanded'); updateHistoryUI(); };
   tray.appendChild(historyChip);
   const tweaks = new Map();
   const tweakData = new Map(); // id -> merged record, persisted across reloads
-  const HKEY = 'twk-history';
+  const HKEY = 'cz-history';
   const MAX_TWEAKS = 40;
 
   function updateHistoryUI() {
     const rows = tweaksWrap.children.length;
-    const expanded = tweaksWrap.classList.contains('twk-expanded');
+    const expanded = tweaksWrap.classList.contains('cz-expanded');
     const hidden = Math.max(0, rows - 5);
     if (rows <= 5) { historyChip.style.display = 'none'; fade.style.display = 'none'; return; }
     historyChip.style.display = '';
@@ -1020,11 +1020,11 @@
     const key = String(t.id);
     let row = tweaks.get(key);
     if (!row) {
-      row = el('div', 'twk-tweak');
+      row = el('div', 'cz-tweak');
       row._id = key;
-      row._dot = el('span', 'twk-dot');
+      row._dot = el('span', 'cz-dot');
       row._label = el('span', null, '');
-      row._meta = el('span', 'twk-meta', '');
+      row._meta = el('span', 'cz-meta', '');
       row._cancel = el('button', null, 'cancel');
       row._cancel.style.display = 'none';
       row._cancel.onclick = async () => {
@@ -1052,7 +1052,7 @@
     }
     if (t.label) row._label.textContent = t.label;
     if (t.status) {
-      row._dot.className = 'twk-dot ' + t.status;
+      row._dot.className = 'cz-dot ' + t.status;
       const inFlight = t.status === 'queued' || t.status === 'running';
       row._cancel.style.display = inFlight ? '' : 'none';
       const undoable = t.status === 'done' && !key.startsWith('x');
@@ -1114,7 +1114,7 @@
   // consts, some structural/model edits). To guarantee changes always show
   // without a manual refresh, do a seamless reload after a write settles —
   // debounced, and preserving scroll + select mode + the current selection.
-  const RKEY = 'twk-reload-state';
+  const RKEY = 'cz-reload-state';
   let reloadTimer = null;
   function scheduleReload() {
     if (!state.autoReload) return;
@@ -1159,7 +1159,7 @@
     })();
     if (saved.selectMode) setMode(true);
     if (saved.loc) {
-      const again = document.querySelector(`[data-twk="${CSS.escape(saved.loc)}"]`);
+      const again = document.querySelector(`[data-cz="${CSS.escape(saved.loc)}"]`);
       if (again) select(again);
     }
   }
@@ -1167,10 +1167,10 @@
   else addEventListener('load', restoreAfterReload);
 
   // ---------- mode + events ----------
-  const hint = el('div', 'twk-hint', '⌘. select mode');
+  const hint = el('div', 'cz-hint', '⌘0 select mode');
   root.appendChild(hint);
 
-  const reloadToggle = el('button', 'twk-reload-toggle');
+  const reloadToggle = el('button', 'cz-reload-toggle');
   const syncReloadToggle = () => {
     reloadToggle.textContent = state.autoReload ? '⟳ auto-reload on' : '⟳ auto-reload off';
     reloadToggle.classList.toggle('off', !state.autoReload);
@@ -1178,7 +1178,7 @@
   };
   reloadToggle.onclick = () => {
     state.autoReload = !state.autoReload;
-    try { localStorage.setItem('twk-autoreload', state.autoReload ? '1' : '0'); } catch { /* no storage */ }
+    try { localStorage.setItem('cz-autoreload', state.autoReload ? '1' : '0'); } catch { /* no storage */ }
     syncReloadToggle();
   };
   syncReloadToggle();
@@ -1186,13 +1186,13 @@
 
   function setMode(on) {
     state.selectMode = on;
-    hint.textContent = on ? 'select mode — click · shift-click multi · Tab next · ⌘Z undo · Esc exit' : '⌘. select mode';
+    hint.textContent = on ? 'select mode — click · shift-click multi · Tab next · ⌘Z undo · Esc exit' : '⌘0 select mode';
     if (!on) { setHover(null); deselect(); clearMulti(); }
   }
 
   // Visible, stamped elements in document order — the Tab cycle.
   function stampedEls() {
-    return [...document.querySelectorAll('[data-twk]')].filter((n) => n.getClientRects().length);
+    return [...document.querySelectorAll('[data-cz]')].filter((n) => n.getClientRects().length);
   }
   function selectNext(dir) {
     const els = stampedEls();
@@ -1219,7 +1219,7 @@
     t instanceof Element && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 
   addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === '.') {
+    if ((e.metaKey || e.ctrlKey) && e.key === '0') {
       e.preventDefault();
       setMode(!state.selectMode);
       return;
@@ -1253,7 +1253,7 @@
   addEventListener('mousemove', (e) => {
     if (!state.selectMode || state.editing) return;
     if (inOverlay(e.target)) return setHover(null);
-    setHover(e.target instanceof Element ? e.target.closest('[data-twk]') : null);
+    setHover(e.target instanceof Element ? e.target.closest('[data-cz]') : null);
   }, true);
 
   addEventListener('click', (e) => {
@@ -1271,7 +1271,7 @@
     }
     e.preventDefault();
     e.stopPropagation();
-    const target = e.target instanceof Element ? e.target.closest('[data-twk]') : null;
+    const target = e.target instanceof Element ? e.target.closest('[data-cz]') : null;
     // Shift-click toggles an element in the multi-selection set.
     if (target && e.shiftKey) return toggleMulti(target);
     if (state.multi.length) clearMulti();

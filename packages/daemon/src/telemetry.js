@@ -1,7 +1,7 @@
 // Anonymous usage telemetry — loud about itself, trivial to disable.
 // Collected: package version, node version, OS platform, whether Tailwind was
 // detected, and per-kind tweak COUNTS. Never: code, file paths, file names,
-// prompts, or anything identifying. Disable with TWEAKLOCAL_TELEMETRY=0 or
+// prompts, or anything identifying. Disable with CMDZERO_TELEMETRY=0 or
 // the DO_NOT_TRACK=1 convention.
 import fs from 'node:fs';
 import os from 'node:os';
@@ -9,12 +9,12 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 const ENDPOINT =
-  process.env.TWEAKLOCAL_TELEMETRY_URL || 'https://telemetry.tweaklocal.dev/v1/events';
-const CONFIG_PATH = path.join(os.homedir(), '.tweaklocal', 'telemetry.json');
+  process.env.CMDZERO_TELEMETRY_URL || 'https://telemetry.cmdzero.dev/v1/events';
+const CONFIG_PATH = path.join(os.homedir(), '.cmdzero', 'telemetry.json');
 const FLUSH_MS = 60_000;
 
 export function telemetryDisabled() {
-  const v = String(process.env.TWEAKLOCAL_TELEMETRY ?? '').toLowerCase();
+  const v = String(process.env.CMDZERO_TELEMETRY ?? '').toLowerCase();
   if (v === '0' || v === 'false' || v === 'off') return true;
   if (String(process.env.DO_NOT_TRACK) === '1') return true;
   return false;
@@ -38,10 +38,10 @@ function saveConfig(config) {
 }
 
 export const DISCLOSURE = [
-  '[tweaklocal] Anonymous usage telemetry helps prioritize framework support.',
+  '[cmdzero] Anonymous usage telemetry helps prioritize framework support.',
   '             Collected: version, OS, tweak counts. Never: code, file paths,',
   '             prompts, or anything identifying.',
-  '             Opt out any time: TWEAKLOCAL_TELEMETRY=0  (DO_NOT_TRACK=1 also respected)',
+  '             Opt out any time: CMDZERO_TELEMETRY=0  (DO_NOT_TRACK=1 also respected)',
 ].join('\n');
 
 export function initTelemetry({ version, tailwind }) {

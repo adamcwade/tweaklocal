@@ -77,7 +77,7 @@ export function startServer({ root, port = 4100 }) {
       }
 
       if (req.method === 'GET' && url.pathname === '/api/health') {
-        return json(res, { ok: true, root, totals, tailwind, telemetry: !telemetry.disabled });
+        return json(res, { ok: true, version: VERSION, root, totals, tailwind, telemetry: !telemetry.disabled });
       }
 
       if (req.method === 'GET' && url.pathname === '/api/events') {

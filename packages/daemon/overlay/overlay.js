@@ -1277,6 +1277,11 @@
     .then((h) => {
       showTotals(h.totals);
       if (h.tailwind === false) state.tailwind = false;
+      // Show the running overlay version so a stale/cached overlay is obvious.
+      if (h.version) {
+        brand.innerHTML = `<kbd>⌘0</kbd> CmdZero <span style="opacity:.45;font-weight:400">v${h.version}</span>`;
+        console.log(`[cmdzero] overlay v${h.version} — newest alerts at the bottom of the tray`);
+      }
     })
     .catch(() => {});
 

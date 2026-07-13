@@ -34,13 +34,22 @@
   .cz-dragghost{position:fixed;pointer-events:none;z-index:2147483350;opacity:.5;outline:2px dashed #6366f1;border-radius:4px;background:rgba(99,102,241,.12)}
   .cz-delete-btn:hover{background:#ef4444}
   .cz-delete-btn svg{width:12px;height:12px;pointer-events:none}
-  .cz-pop{position:fixed;background:#111827;color:#f9fafb;border:1.5px solid #10b981;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);padding:8px;pointer-events:auto;display:flex;flex-direction:column;gap:6px;min-width:300px;max-width:340px;font-size:12px}
+  .cz-pop{position:fixed;background:#111827;color:#f9fafb;border:1.5px solid #10b981;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35);padding:8px;pointer-events:auto;display:flex;flex-direction:column;gap:6px;min-width:340px;max-width:400px;font-size:12px}
+  .cz-pop textarea{flex:1;width:100%;min-height:66px;resize:vertical;background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:7px 9px;font-size:12.5px;line-height:1.45;outline:none;font-family:inherit}
+  .cz-pop textarea:focus{border-color:#6366f1}
   .cz-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
   .cz-pop button{background:#374151;color:#f9fafb;border:none;border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer}
   .cz-pop button:hover{background:#4b5563}
   .cz-pop button.cz-primary{background:#6366f1}
   .cz-pop input{flex:1;background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:5px 8px;font-size:12px;outline:none}
   .cz-pop select{background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:3px 4px;font-size:11.5px;outline:none}
+  .cz-panel{position:fixed;left:12px;top:42px;width:238px;max-height:calc(100vh - 58px);overflow-y:auto;background:#111827;color:#f9fafb;border:1.5px solid #10b981;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.4);padding:9px;pointer-events:auto;display:flex;flex-direction:column;gap:6px;font-size:12px;z-index:2147483100}
+  .cz-panel .cz-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .cz-panel button{background:#374151;color:#f9fafb;border:none;border-radius:6px;padding:4px 9px;font-size:12px;cursor:pointer}
+  .cz-panel button:hover{background:#4b5563}
+  .cz-panel select{background:#1f2937;border:1px solid #374151;border-radius:6px;color:#f9fafb;padding:3px 4px;font-size:11.5px;outline:none}
+  .cz-ptitle{font-family:ui-monospace,monospace;font-size:11px;color:#6ee7b7;padding-bottom:5px;border-bottom:1px solid #1f2937}
+  .cz-sec{color:#94a3b8;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin:5px 0 1px}
   .cz-label{color:#9ca3af;min-width:50px}
   .cz-note{color:#fbbf24;font-size:11px;line-height:1.35;background:rgba(245,158,11,.1);border-radius:6px;padding:4px 7px}
   .cz-note.cz-info{color:#93c5fd;background:rgba(59,130,246,.12)}
@@ -49,16 +58,24 @@
   .cz-swatch{width:18px;height:18px;border-radius:4px;border:1px solid rgba(255,255,255,.25);cursor:pointer;padding:0}
   .cz-swatch:hover{transform:scale(1.15)}
   .cz-chip{font-size:10.5px !important;padding:2px 6px !important}
-  .cz-tray{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:auto}
+  .cz-tray{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:auto;transition:transform .28s cubic-bezier(.4,0,.2,1),opacity .22s ease}
+  .cz-tray.cz-dodged{transform:translateX(calc(100% + 28px));opacity:0;pointer-events:none}
+  .cz-banner{position:fixed;top:0;left:0;right:0;height:30px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 14px;background:rgba(9,13,20,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid #1f2937;color:#cbd5e1;font-size:12px;line-height:1;pointer-events:auto;z-index:2147483200;box-sizing:border-box}
+  .cz-banner .cz-brand{display:flex;align-items:center;gap:6px;font-weight:600;color:#e2e8f0;flex:none}
+  .cz-banner .cz-brand kbd{background:#10b981;color:#052e1b;border-radius:5px;padding:2px 6px;font-size:10.5px;font-family:ui-monospace,monospace;font-weight:700}
+  .cz-banner .cz-stats{display:flex;gap:18px;align-items:center;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;flex:1;justify-content:center}
+  .cz-banner .cz-stat span{color:#64748b}
+  .cz-banner .cz-stat b{color:#f1f5f9;font-weight:600;margin-left:5px}
+  .cz-banner .cz-stat.cz-accent b{color:#6ee7b7}
+  .cz-banner a{color:#6ee7b7;text-decoration:none;flex:none}
+  .cz-banner a:hover{text-decoration:underline}
+  .cz-banner .cz-idle{color:#64748b}
   .cz-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
   .cz-wrap.cz-expanded{max-height:calc(100vh - 90px);overflow-y:auto;overflow-x:hidden;padding:2px}
   .cz-wrap:not(.cz-expanded) > .cz-tweak:nth-child(n+6){display:none}
   .cz-fade{height:16px;width:160px;background:linear-gradient(to bottom,rgba(17,24,39,0),rgba(17,24,39,.55));pointer-events:none;margin-top:-10px}
   .cz-history{background:#0b1220;color:#93c5fd;border:1px solid #263041;border-radius:8px;padding:4px 10px;font-size:11.5px;cursor:pointer;pointer-events:auto;box-shadow:0 4px 14px rgba(0,0,0,.3)}
   .cz-history:hover{border-color:#6366f1}
-  .cz-total{background:#064e3b;color:#a7f3d0;border-radius:8px;padding:6px 11px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px}
-  .cz-total a{color:#6ee7b7;margin-left:10px;text-decoration:underline;cursor:pointer}
-  .cz-total a:hover{color:#a7f3d0}
   .cz-tweak{background:#111827;color:#e5e7eb;border-radius:8px;padding:7px 11px;font-size:13px;display:flex;gap:8px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3);white-space:nowrap;width:max-content;max-width:720px;overflow:hidden;text-overflow:ellipsis}
   .cz-dot{width:8px;height:8px;border-radius:50%;flex:none}
   .cz-dot.done{background:#10b981}.cz-dot.queued,.cz-dot.running{background:#f59e0b;animation:cz-pulse 1s infinite}.cz-dot.error{background:#ef4444}.cz-dot.reverted,.cz-dot.cancelled{background:#6b7280}
@@ -213,6 +230,11 @@
   const pop = el('div', 'cz-pop');
   pop.style.display = 'none';
   root.appendChild(pop);
+  // Left-side style inspector — every style attribute broken out into its own
+  // control, populated by renderPanel() when an element is selected.
+  const panel = el('div', 'cz-panel');
+  panel.style.display = 'none';
+  root.appendChild(panel);
   const popLabel = el('div', 'cz-pop-label');
   popLabel.style.display = 'none';
   root.appendChild(popLabel);
@@ -305,6 +327,7 @@
   const dropLine = el('div', 'cz-drop');
   dropLine.style.display = 'none';
   root.appendChild(dropLine);
+  let suppressClick = false; // swallow the click the browser fires right after a drag
 
   grip.addEventListener('mousedown', (e) => {
     e.preventDefault();
@@ -313,20 +336,36 @@
     if (!s || !document.contains(s.el)) return;
     const axis = siblingAxis(s.el);
     const { peers } = dragPeers(s.el, s.loc);
-    if (peers.length < 2) return; // nothing to reorder among
+    if (peers.length < 2) {
+      addTweak({ id: 'x' + Date.now(), status: 'error', label: 'nothing to reorder here — select a card in a row, or the section container' });
+      return;
+    }
     const from = peers.indexOf(s.el);
-    let insertIndex = from;
+    if (from < 0) return;
+    const startX = e.clientX, startY = e.clientY;
+    let engaged = false, insertIndex = from;
+
+    const engage = () => {
+      engaged = true;
+      document.body.style.cursor = 'grabbing';
+      grip.style.cursor = 'grabbing';
+      s.el.style.opacity = '0.45'; // show what's moving
+      // hide the panels/popover so they don't block the drop targets
+      pop.style.display = 'none'; panel.style.display = 'none'; popLabel.style.display = 'none';
+    };
 
     const onMove = (ev) => {
+      if (!engaged) {
+        if (Math.abs(ev.clientX - startX) < 4 && Math.abs(ev.clientY - startY) < 4) return; // threshold
+        engage();
+      }
       const pos = axis === 'horizontal' ? ev.clientX : ev.clientY;
-      // find insertion slot: before the first peer whose midpoint is past pointer
       insertIndex = peers.length;
       for (let i = 0; i < peers.length; i++) {
         const rr = peers[i].getBoundingClientRect();
         const mid = axis === 'horizontal' ? rr.left + rr.width / 2 : rr.top + rr.height / 2;
         if (pos < mid) { insertIndex = i; break; }
       }
-      // draw the drop indicator at that gap
       const ref = peers[Math.min(insertIndex, peers.length - 1)].getBoundingClientRect();
       dropLine.style.display = 'block';
       if (axis === 'horizontal') {
@@ -341,11 +380,20 @@
       removeEventListener('mousemove', onMove, true);
       removeEventListener('mouseup', onUp, true);
       dropLine.style.display = 'none';
+      document.body.style.cursor = '';
+      grip.style.cursor = 'grab';
+      if (document.contains(s.el)) s.el.style.opacity = '';
+      if (!engaged) return; // was a click, not a drag
+      suppressClick = true; // swallow the synthetic click that follows a drag
+      setTimeout(() => { suppressClick = false; }, 0);
+      const restore = () => { if (state.selected === s && document.contains(s.el)) { renderPopover(); renderPanel(); reposition(); } };
       const finalIndex = insertIndex > from ? insertIndex - 1 : insertIndex;
-      if (finalIndex === from || finalIndex < 0) return;
+      if (finalIndex === from || finalIndex < 0) { restore(); return; } // dropped where it started
       try {
         await api('move', { loc: s.loc, index: instanceIndex(s.el, s.loc), toIndex: finalIndex });
+        restore(); // reorder shows via auto-reload; restore panels if it doesn't
       } catch (err) {
+        restore();
         addTweak({ id: 'x' + Date.now(), status: 'error', label: `move: ${err.message.slice(0, 140)}` });
       }
     };
@@ -354,7 +402,7 @@
   });
 
   function select(target) {
-    finishTextEdit(false);
+    finishTextEdit(true); // moving to another element saves the current text edit
     const loc = target.getAttribute('data-cz');
     // How many rendered elements map to this same source line — i.e. how many
     // instances a shared-source edit (style/functionality) will change.
@@ -362,6 +410,7 @@
     state.selected = { el: target, loc, meta: null, instances };
     selBox.style.display = 'block';
     renderPopover();
+    renderPanel();
     reposition();
     loadMeta();
   }
@@ -377,15 +426,20 @@
       if (state.selected !== s) return; // selection changed meanwhile
       s.meta = meta;
       renderPopover();
+      renderPanel();
       reposition();
+      // Text editing is active the moment an editable element is highlighted —
+      // no button click needed. Caret goes to the end so it's non-destructive.
+      if (canEditWholeText(s) && !state.editing) startTextEdit(false);
     } catch { /* element not resolvable — leave popover as is */ }
   }
 
   function deselect() {
-    finishTextEdit(false);
+    finishTextEdit(true); // exiting/⌘0 saves the current text edit
     state.selected = null;
     selBox.style.display = 'none';
     pop.style.display = 'none';
+    panel.style.display = 'none';
     popLabel.style.display = 'none';
     deleteBtn.style.display = 'none';
     moveBar.style.display = 'none';
@@ -494,8 +548,12 @@
     const r = positionBox(selBox, s.el);
     pop.style.display = 'flex';
     const labelH = 22; // room for the file:line tab above the panel
-    const top = r.bottom + 8 + labelH + pop.offsetHeight > innerHeight ? r.top - pop.offsetHeight - 8 : r.bottom + 8 + labelH;
-    const left = Math.min(Math.max(r.left, 8), innerWidth - 356);
+    // Keep a generous gap so the panel never sits on top of the text you're
+    // editing — below the element by default, above only if there's no room.
+    const GAP = 26;
+    const below = r.bottom + GAP + labelH;
+    const top = below + pop.offsetHeight > innerHeight ? r.top - pop.offsetHeight - GAP : below;
+    const left = Math.min(Math.max(r.left, 8), innerWidth - Math.max(pop.offsetWidth + 16, 356));
     Object.assign(pop.style, { left: left + 'px', top: Math.max(top, 8 + labelH) + 'px' });
     popLabel.style.display = 'block';
     popLabel.textContent = s.instances > 1 ? `${shortLoc(s.loc)} · ${s.instances}×` : shortLoc(s.loc);
@@ -529,7 +587,7 @@
     } catch (e) {
       addTweak({ id: 'x' + Date.now(), status: 'error', label: `${label}: ${e.message}` });
     }
-    setTimeout(() => { reposition(); renderPopover(); }, 350); // after HMR
+    setTimeout(() => { reposition(); renderPopover(); renderPanel(); }, 350); // after HMR
   }
 
   // ---------- popover ----------
@@ -613,7 +671,7 @@
     } catch (e) {
       addTweak({ id: 'x' + Date.now(), status: 'error', label: `${label}: ${e.message}` });
     }
-    setTimeout(() => { reposition(); renderPopover(); }, 350);
+    setTimeout(() => { reposition(); renderPopover(); renderPanel(); }, 350);
   }
 
   function pxStep(current, scale, dir) {
@@ -726,6 +784,80 @@
     return row;
   }
 
+  // Build the inline swatches/chips control for one style property (used by the
+  // left panel — every attribute broken out, no dropdown).
+  function buildPropSwatches(name, tw) {
+    const s = state.selected;
+    const wrap = el('div', 'cz-swatches');
+    const p = (tw ? PROPS : STYLE_PROPS)[name];
+    if (!p) return wrap;
+    if (p.type === 'color') {
+      if (tw) {
+        const { colors, fromDS } = readTheme();
+        if (!fromDS) { wrap.append(el('span', 'cz-meta', 'no design-system colors in CSS')); return wrap; }
+        for (const c of colors) {
+          const b = el('button', 'cz-swatch');
+          b.style.background = c.value;
+          b.title = `${p.prefix}-${c.name}`;
+          b.onclick = () => applyClassTweak(propChange(s.el, name, `${p.prefix}-${c.name}`), name);
+          wrap.appendChild(b);
+        }
+      } else {
+        const { varColors } = readTheme();
+        const palette = varColors.length ? varColors.slice(0, 48) : harvestPageColors();
+        for (const c of palette) {
+          const b = el('button', 'cz-swatch');
+          b.style.background = c.value;
+          b.title = c.name;
+          b.onclick = () => applyStyleProp(name, c.apply);
+          wrap.appendChild(b);
+        }
+      }
+    } else {
+      p.options.forEach((opt, i) => {
+        const b = el('button', 'cz-chip', p.labels ? p.labels[i] : opt);
+        b.onclick = () => tw ? applyClassTweak(propChange(s.el, name, opt), name) : applyStyleProp(name, opt);
+        wrap.appendChild(b);
+      });
+    }
+    return wrap;
+  }
+
+  // Left inspector panel: every style attribute broken out into its own control.
+  function renderPanel() {
+    const s = state.selected;
+    if (!s) { panel.style.display = 'none'; return; }
+    panel.style.display = 'flex';
+    panel.textContent = '';
+    panel.appendChild(el('div', 'cz-ptitle', `<${s.el.tagName.toLowerCase()}>  ${shortLoc(s.loc)}${s.instances > 1 ? ` · ${s.instances}×` : ''}`));
+    const tw = state.tailwind;
+
+    panel.appendChild(el('div', 'cz-sec', 'Spacing'));
+    if (tw) { panel.appendChild(spacingRow('Padding', 'p')); panel.appendChild(spacingRow('Margin', 'm')); }
+    else { panel.appendChild(spacingRowPx('Padding', 'padding')); panel.appendChild(spacingRowPx('Margin', 'margin')); }
+
+    panel.appendChild(el('div', 'cz-sec', 'Typography'));
+    if (tw) {
+      const fontRow = el('div', 'cz-row');
+      fontRow.append(el('span', 'cz-label', 'Font'));
+      const fMinus = el('button', null, 'A−');
+      const fPlus = el('button', null, 'A+');
+      fMinus.onclick = () => applyClassTweak(fontStep(s.el, -1), 'font');
+      fPlus.onclick = () => applyClassTweak(fontStep(s.el, +1), 'font');
+      const curFont = classList(s.el).find((c) => readTheme().textSizes.includes(c));
+      fontRow.append(fMinus, fPlus, el('span', 'cz-cur', curFont || 'inherited'));
+      panel.appendChild(fontRow);
+    } else {
+      panel.appendChild(fontRowPx());
+    }
+
+    panel.appendChild(el('div', 'cz-sec', 'Color & border'));
+    for (const name of Object.keys(tw ? PROPS : STYLE_PROPS)) {
+      panel.appendChild(el('span', 'cz-label', name));
+      panel.appendChild(buildPropSwatches(name, tw));
+    }
+  }
+
   function renderPopover() {
     const s = state.selected;
     if (!s) return;
@@ -758,12 +890,7 @@
       const wholeText =
         literals.length === 1 && literals[0].value.trim() === s.el.textContent.trim();
       if (wholeText) {
-        const row = el('div', 'cz-row');
-        row.append(el('span', 'cz-label', 'Copy'));
-        const b = el('button', null, '✎ Edit text in place');
-        b.onclick = () => startTextEdit();
-        row.appendChild(b);
-        pop.appendChild(row);
+        pop.appendChild(el('div', 'cz-note cz-info', '✎ Editing text inline — just type. Saves on ⌘0 or when you move to another element; Esc cancels.'));
       } else {
         // DOM is transformed (or several literals) → edit the source text here
         for (const t of literals) {
@@ -790,91 +917,13 @@
       }
     }
 
-    // Deterministic style controls. Tailwind apps get class edits; everything
-    // else gets inline-style edits — same zero-token lane, any styling system.
-    const tw = state.tailwind;
+    // Style controls now live in the left inspector panel (renderPanel).
 
-    if (tw) {
-      pop.appendChild(spacingRow('Padding', 'p'));
-      pop.appendChild(spacingRow('Margin', 'm'));
-      const fontRow = el('div', 'cz-row');
-      fontRow.append(el('span', 'cz-label', 'Font'));
-      const fMinus = el('button', null, 'A−');
-      const fPlus = el('button', null, 'A+');
-      fMinus.onclick = () => applyClassTweak(fontStep(s.el, -1), 'font');
-      fPlus.onclick = () => applyClassTweak(fontStep(s.el, +1), 'font');
-      fontRow.append(fMinus, fPlus);
-      const curFont = classList(s.el).find((c) => readTheme().textSizes.includes(c));
-      fontRow.append(el('span', 'cz-cur', curFont || 'inherited'));
-      pop.appendChild(fontRow);
-    } else {
-      pop.appendChild(spacingRowPx('Padding', 'padding'));
-      pop.appendChild(spacingRowPx('Margin', 'margin'));
-      pop.appendChild(fontRowPx());
-    }
-
-    // property editor
-    const propRow = el('div', 'cz-row');
-    propRow.append(el('span', 'cz-label', 'Style'));
-    const propSel = el('select');
-    propSel.appendChild(el('option', null, 'Choose property…'));
-    for (const name of Object.keys(tw ? PROPS : STYLE_PROPS)) {
-      const o = el('option', null, name);
-      o.value = name;
-      propSel.appendChild(o);
-    }
-    propRow.appendChild(propSel);
-    pop.appendChild(propRow);
-    const swatches = el('div', 'cz-swatches');
-    pop.appendChild(swatches);
-    propSel.onchange = () => {
-      swatches.textContent = '';
-      const p = (tw ? PROPS : STYLE_PROPS)[propSel.value];
-      if (!p) return;
-      if (p.type === 'color') {
-        if (tw) {
-          const { colors, fromDS } = readTheme();
-          if (!fromDS) {
-            swatches.append(el('span', 'cz-meta', 'no design-system colors found in page CSS'));
-            return;
-          }
-          for (const c of colors) {
-            const b = el('button', 'cz-swatch');
-            b.style.background = c.value;
-            b.title = `${p.prefix}-${c.name}`;
-            b.onclick = () => applyClassTweak(propChange(s.el, propSel.value, `${p.prefix}-${c.name}`), propSel.value);
-            swatches.appendChild(b);
-          }
-        } else {
-          // design tokens if the app defines color custom properties,
-          // otherwise the palette actually rendered on the page
-          const { varColors } = readTheme();
-          const palette = varColors.length ? varColors.slice(0, 48) : harvestPageColors();
-          for (const c of palette) {
-            const b = el('button', 'cz-swatch');
-            b.style.background = c.value;
-            b.title = c.name;
-            b.onclick = () => applyStyleProp(propSel.value, c.apply);
-            swatches.appendChild(b);
-          }
-        }
-      } else {
-        p.options.forEach((opt, i) => {
-          const b = el('button', 'cz-chip', p.labels ? p.labels[i] : opt);
-          b.onclick = () =>
-            tw
-              ? applyClassTweak(propChange(s.el, propSel.value, opt), propSel.value)
-              : applyStyleProp(propSel.value, opt);
-          swatches.appendChild(b);
-        });
-      }
-      reposition();
-    };
-
-    const nlRow = el('div', 'cz-row');
-    const input = el('input');
-    input.placeholder = 'Describe a change…';
-    const go = el('button', 'cz-primary', 'Go');
+    const nlWrap = el('div', 'cz-nlwrap');
+    const input = el('textarea');
+    input.placeholder = 'Describe a change… (⌘↵ to send)';
+    input.rows = 3;
+    const go = el('button', 'cz-primary', 'Go →');
     const send = async () => {
       const instruction = input.value.trim();
       if (!instruction) return;
@@ -888,9 +937,13 @@
       }
     };
     go.onclick = send;
-    input.onkeydown = (e) => { if (e.key === 'Enter') send(); e.stopPropagation(); };
-    nlRow.append(input, go);
-    pop.appendChild(nlRow);
+    // ⌘↵ / Ctrl↵ sends; plain Enter inserts a newline (multi-line prompts).
+    input.onkeydown = (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } e.stopPropagation(); };
+    const goRow = el('div', 'cz-row');
+    goRow.style.justifyContent = 'flex-end';
+    goRow.appendChild(go);
+    nlWrap.append(input, goRow);
+    pop.appendChild(nlWrap);
 
     // Model picker: Auto (router) or a forced tier.
     const modelRow = el('div', 'cz-row');
@@ -913,11 +966,21 @@
   // descriptions, buttons, links — even when animations have split the DOM
   // into spans: we swap in the source text for editing and keep the original
   // DOM aside so Esc restores it untouched.
-  function startTextEdit() {
+  // Whether the selected element's whole visible text is a single source
+  // literal we can edit in place (headings, buttons, links, paragraphs — not
+  // containers, and not text shared across multiple instances).
+  function canEditWholeText(s) {
+    const lits = s?.meta?.texts;
+    if (!lits || lits.length !== 1 || s.instances > 1) return false;
+    return document.contains(s.el) && lits[0].value.trim() === s.el.textContent.trim();
+  }
+
+  function startTextEdit(selectAll = true) {
     const s = state.selected;
     // the popover can outlive its selection (HMR, reloads) — never throw
     const literal = s?.meta?.texts?.[0]?.value;
     if (literal == null || !document.contains(s.el)) return;
+    if (state.editing && state.editing.el === s.el) return; // already editing this one
     const frag = document.createDocumentFragment();
     while (s.el.firstChild) frag.appendChild(s.el.firstChild);
     state.editing = {
@@ -930,9 +993,11 @@
     s.el.textContent = literal;
     s.el.style.userSelect = 'text'; // buttons often have user-select: none
     try { s.el.contentEditable = 'plaintext-only'; } catch { s.el.contentEditable = 'true'; }
-    s.el.focus();
-    document.getSelection()?.selectAllChildren(s.el);
-    hint.textContent = 'editing copy — Enter saves · Esc cancels · click away saves';
+    s.el.focus({ preventScroll: true });
+    const sel = document.getSelection();
+    if (selectAll) sel?.selectAllChildren(s.el);
+    else { const rng = document.createRange(); rng.selectNodeContents(s.el); rng.collapse(false); sel?.removeAllRanges(); sel?.addRange(rng); }
+    hint.textContent = 'editing text — type to change · ⌘0 or click another element saves · Esc cancels';
   }
 
   async function finishTextEdit(commit) {
@@ -961,20 +1026,28 @@
     setTimeout(() => { reposition(); loadMeta(); }, 350);
   }
 
-  // ---------- tray ----------
-  const tray = el('div', 'cz-tray');
-  root.appendChild(tray);
-  const totalBar = el('div', 'cz-total');
-  totalBar.style.display = 'none';
-  const totalText = el('span');
-  const reportLink = el('a', null, 'monthly report →');
+  // ---------- stats banner (permanent, above the site) ----------
+  const banner = el('div', 'cz-banner');
+  const brand = el('div', 'cz-brand');
+  brand.innerHTML = '<kbd>⌘0</kbd> CmdZero';
+  const bannerStats = el('div', 'cz-stats');
+  const reportLink = el('a', null, 'report →');
   reportLink.href = 'https://cmdzero.dev/report';
   reportLink.target = '_blank';
   reportLink.rel = 'noopener';
-  totalBar.append(totalText, reportLink);
-  tray.appendChild(totalBar);
-  // Alerts live in their own wrap so history can collapse independently of the
-  // savings bar. Newest is inserted at the top; the 5 newest stay visible and
+  banner.append(brand, bannerStats, reportLink);
+  root.appendChild(banner);
+  // Push the page down so the banner sits ABOVE the site rather than over it.
+  try {
+    const prevPad = getComputedStyle(document.body).paddingTop;
+    document.body.style.paddingTop = `calc(${prevPad} + 30px)`;
+  } catch { /* no body yet */ }
+
+  // ---------- tray ----------
+  const tray = el('div', 'cz-tray');
+  root.appendChild(tray);
+  // Alerts live in their own wrap so history can collapse independently.
+  // Newest is inserted at the top; the 5 newest stay visible and
   // older ones fold behind an expander (fades at the bottom).
   const tweaksWrap = el('div', 'cz-wrap');
   tray.appendChild(tweaksWrap);
@@ -1010,11 +1083,35 @@
     } catch { /* no storage */ }
   }
 
-  function showTotals(t) {
-    if (!t || !t.count) return;
-    totalBar.style.display = '';
-    totalText.textContent = `≈ saved $${t.usd.toFixed(2)} · ${Math.round(t.ms / 1000)}s across ${t.count} tweak${t.count === 1 ? '' : 's'} (vs unscoped agent)`;
+  const stat = (label, value, accent) => {
+    const s = el('div', 'cz-stat' + (accent ? ' cz-accent' : ''));
+    s.append(el('span', null, label), el('b', null, value));
+    return s;
+  };
+  // How many of the session's tweaks cost zero tokens (copy/style/move/delete).
+  function zeroTokenCount() {
+    let z = 0;
+    for (const r of tweakData.values()) if (!r.model && r.tokens === 0 && !String(r.id).startsWith('x')) z++;
+    return z;
   }
+  function showTotals(t) {
+    bannerStats.textContent = '';
+    if (!t || !t.count) {
+      bannerStats.append(el('span', 'cz-idle', 'Press ⌘0, then click any element to tweak it — edits land in your source.'));
+      return;
+    }
+    const secs = Math.round(t.ms / 1000);
+    const time = secs >= 60 ? `${Math.round(secs / 60)}m` : `${secs}s`;
+    const z = zeroTokenCount();
+    bannerStats.append(
+      stat('tweaks', String(t.count)),
+      stat('saved', `$${t.usd.toFixed(2)}`, true),
+      stat('faster', time, true),
+    );
+    if (z > 0) bannerStats.append(stat('zero-token', String(z)));
+    bannerStats.append(stat('vs', 'unscoped agent'));
+  }
+  showTotals(null); // idle banner on load until /api/health arrives
 
   function addTweak(t, hydrate) {
     const key = String(t.id);
@@ -1244,29 +1341,37 @@
       selectNext(e.shiftKey ? -1 : 1);
       return;
     }
-    if (e.key === 'Enter' && state.editing) {
+    // Enter saves ONLY when the caret is in the edited element — not when
+    // typing in the popover's textarea (which uses Enter for newlines).
+    if (e.key === 'Enter' && state.editing && e.target === state.editing.el) {
       e.preventDefault();
       finishTextEdit(true);
     }
   }, true);
 
   addEventListener('mousemove', (e) => {
-    if (!state.selectMode || state.editing) return;
+    if (!state.selectMode) return;
+    // keep hover previews live even while editing text, so you can see the
+    // next element you'll click (clicking saves + moves there)
     if (inOverlay(e.target)) return setHover(null);
+    if (state.editing && state.editing.el.contains(e.target)) return setHover(null);
     setHover(e.target instanceof Element ? e.target.closest('[data-cz]') : null);
   }, true);
 
   addEventListener('click', (e) => {
     if (!state.selectMode) return;
+    if (suppressClick) { e.preventDefault(); e.stopPropagation(); return; } // just finished a drag
     if (inOverlay(e.target)) return;
     if (state.editing) {
-      // clicks inside the editable text place the caret; clicks anywhere
-      // else save the edit (and never navigate/select mid-edit)
-      if (!state.editing.el.contains(e.target)) {
-        e.preventDefault();
-        e.stopPropagation();
-        finishTextEdit(true);
-      }
+      // clicks inside the editable text just place the caret; clicking another
+      // element saves the current edit AND moves the selection there.
+      if (state.editing.el.contains(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      finishTextEdit(true);
+      const next = e.target instanceof Element ? e.target.closest('[data-cz]') : null;
+      if (next && next !== state.selected?.el) select(next);
+      else if (!next) deselect();
       return;
     }
     e.preventDefault();
@@ -1277,6 +1382,29 @@
     if (state.multi.length) clearMulti();
     if (target) select(target);
     else deselect();
+  }, true);
+
+  // Alert tray dodges the cursor: when the pointer enters its region, slide it
+  // off to the right so you can click the elements underneath; slide back once
+  // the pointer leaves the original region (hysteresis avoids flicker).
+  let trayDodged = false, trayZone = null;
+  addEventListener('mousemove', (e) => {
+    const x = e.clientX, y = e.clientY;
+    if (!trayDodged) {
+      if (!tweaksWrap.children.length) return; // nothing to dodge
+      const r = tray.getBoundingClientRect();
+      if (r.width && x >= r.left - 8 && x <= r.right + 8 && y >= r.top - 8 && y <= r.bottom + 8) {
+        trayZone = r;
+        trayDodged = true;
+        tray.classList.add('cz-dodged');
+      }
+    } else {
+      const r = trayZone, m = 34;
+      if (!r || x < r.left - m || x > r.right + m || y < r.top - m || y > r.bottom + m) {
+        trayDodged = false;
+        tray.classList.remove('cz-dodged');
+      }
+    }
   }, true);
 
   addEventListener('scroll', () => { reposition(); positionMulti(); setHover(state.hoverEl); }, true);

@@ -265,12 +265,54 @@
     try { localStorage.setItem('cz-panel-collapsed', v ? '1' : '0'); } catch { /* no storage */ }
     applyPanelLayout();
   }
+  // Opening the panel animates <body>'s margin over .26s, so the whole page
+  // slides sideways under the overlay. Everything we draw — outline, popover,
+  // move bar, hover badge — is position:fixed at coordinates measured once from
+  // getBoundingClientRect(), and that measurement runs synchronously at the
+  // START of the animation, when the page hasn't moved yet. Left alone, the
+  // boxes sit up to PANEL_W px from their element until something unrelated (a
+  // scroll, an edit) happens to re-measure.
+  //
+  // So re-measure across the animation. rAF is the right clock: it's gated on
+  // painting exactly like the transition, so the two stay in lockstep.
+  //
+  // Runs until the margin reaches `target` AND stops moving — deliberately not a
+  // wall-clock deadline. rAF pauses in a background tab but performance.now()
+  // doesn't, so a timed budget would burn down without ever painting a frame and
+  // leave the boxes stranded on return. Settling on the value is also refresh-rate
+  // independent. The frame cap is only a backstop for a page whose own CSS wins
+  // the margin, so the target is never reached.
+  let shiftRaf = 0;
+  function trackPanelShift(target) {
+    cancelAnimationFrame(shiftRaf);
+    let last = null;
+    let frames = 0;
+    const step = () => {
+      // the same trio the scroll handler runs — a scroll moves the page under
+      // these boxes for exactly the same reason a panel push does
+      reposition();
+      positionMulti();
+      setHover(state.hoverEl);
+      let now;
+      try { now = getComputedStyle(document.body).marginLeft; } catch { return; }
+      const settled = now === target && now === last;
+      last = now;
+      if (!settled && ++frames < 120) shiftRaf = requestAnimationFrame(step);
+    };
+    shiftRaf = requestAnimationFrame(step);
+  }
+
   // Slide the panel in/out and push the page so nothing is covered.
   function applyPanelLayout() {
     const open = !!state.selected && !state.panelCollapsed;
     panel.classList.toggle('cz-collapsed', !open);
     panelTab.classList.toggle('cz-show', !!state.selected && state.panelCollapsed);
-    try { document.body.style.marginLeft = open ? PANEL_W + 'px' : '0px'; } catch { /* ignore */ }
+    const next = open ? PANEL_W + 'px' : '0px';
+    // renderPanel() re-runs this on every selection; only chase the page when
+    // it's actually about to move.
+    const moves = document.body.style.marginLeft !== next;
+    try { document.body.style.marginLeft = next; } catch { /* ignore */ }
+    if (moves) trackPanelShift(next);
   }
 
   const popLabel = el('div', 'cz-pop-label');

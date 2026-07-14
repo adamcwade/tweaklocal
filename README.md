@@ -4,6 +4,12 @@
   <img src="https://raw.githubusercontent.com/adamcwade/cmdzero/main/assets/hero.png" alt="CmdZero — live in-browser UI editing with a style panel, inline copy editing, and a token-savings banner" width="900">
 </p>
 
+<p align="center">
+  <strong><a href="https://cmdzero.xyz/demo">▶︎ Try the live demo — no install</a></strong>
+</p>
+
+Press `⌘0` and edit a real page with the real overlay, running entirely in your browser. Copy, style, reorder, delete and undo all work; natural-language prompts are scripted (no model is called) and nothing is written to disk.
+
 Tweak your UI live in the browser. Select any element, edit copy in place, nudge styles, or describe a change — cmdzero knows exactly which source file and line each element came from, so most tweaks cost **zero tokens** and the rest run through a model sized to the job.
 
 ## How it works

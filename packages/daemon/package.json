@@ -1,6 +1,6 @@
 {
   "name": "cmdzero",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Tweak your UI live in the browser and write the changes straight to source. Copy and Tailwind edits cost zero tokens; everything else routes to a right-sized model via headless claude.",
   "license": "MIT",
   "type": "module",

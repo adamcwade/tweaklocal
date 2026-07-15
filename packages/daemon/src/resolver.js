@@ -18,25 +18,32 @@ function walk(node, cb) {
   }
 }
 
-/** loc format: "<relative file>:<line 1-based>:<col 0-based>" (matches the babel stamp) */
+/**
+ * loc format: "<file>:<line 1-based>:<col 0-based>" (matches the babel stamp).
+ *
+ * The file arrives in one of three shapes, depending on who stamped it: the
+ * babel plugin emits a root-relative path, and the @cmdzero/react dev runtime
+ * passes on whatever the bundler handed jsxDEV — absolute under webpack, but
+ * "[project]/components/Foo.tsx" under Turbopack. Normalize that prefix away
+ * here, at the boundary every caller shares: /api/nl parses locs itself and
+ * resolves them straight against the root, so normalizing further in (say, in
+ * loadTarget) leaves that lane reaching for <root>/[project]/... and dying on
+ * ENOENT while the copy and style lanes look fine.
+ */
 export function parseLoc(loc) {
   const m = /^(.*):(\d+):(\d+)$/.exec(loc);
   if (!m) throw new Error(`bad loc: ${loc}`);
-  return { file: m[1], line: Number(m[2]), col: Number(m[3]) };
+  return { file: m[1].replace(/^\[project\]\//, ''), line: Number(m[2]), col: Number(m[3]) };
 }
 
 export function loadTarget(root, loc) {
   const parsed = parseLoc(loc);
   const { line, col } = parsed;
-  // Stamps come from three sources: the babel plugin (root-relative path,
-  // 0-based column) and the @cmdzero/react dev runtime (1-based column), which
-  // reports whatever the bundler handed jsxDEV — an absolute path under
-  // webpack, but "[project]/..." under Turbopack. Normalize the path and match
-  // either column convention.
-  const raw = parsed.file.replace(/^\[project\]\//, '');
-  // Resolve before the escape check: the guard has to see a normalized path,
-  // or a "foo/../../.." stamp walks straight past a leading-".." test.
-  const file = path.relative(root, path.resolve(root, raw));
+  // parseLoc has already normalized the path's shape; columns still come in two
+  // conventions (babel 0-based, the dev runtime 1-based) and are matched below.
+  // Resolve before the escape check: the guard has to see a normalized path, or
+  // a "foo/../../.." stamp walks straight past a leading-".." test.
+  const file = path.relative(root, path.resolve(root, parsed.file));
   if (file.startsWith('..') || path.isAbsolute(file)) {
     throw new Error('file outside root');
   }

@@ -28,11 +28,18 @@ function detectTailwind(root) {
   }
 }
 
-export function startServer({ root, port = 4100 }) {
+export function startServer({ root, port = 4100, heartbeatMs = 15000 }) {
   const undoStack = new Map(); // id -> { abs, before }
   const running = new Map(); // id -> child process (for cancellation)
   const sseClients = new Set();
-  let nextId = 1;
+  // Seeded from the clock, not 1. The overlay persists its alert history in
+  // localStorage and keys each row by tweak id, and that history outlives the
+  // daemon — so a counter starting over at 1 hands a fresh tweak the id of a row
+  // hydrated from an earlier session. addTweak() updates a known id in place, so
+  // the newest alert would silently overwrite that old row wherever it sits
+  // instead of appending to the bottom of the tray. Still ascending within a
+  // session; just never reissued across a restart.
+  let nextId = Date.now();
   const tailwind = detectTailwind(root);
   const telemetry = initTelemetry({ version: VERSION, tailwind });
 
@@ -98,7 +105,20 @@ export function startServer({ root, port = 4100 }) {
         });
         res.write('\n');
         sseClients.add(res);
-        req.on('close', () => sseClients.delete(res));
+        // Idle streams have to say something. A browser can't tell a quiet
+        // daemon from a dead one: the EventSource stays in readyState OPEN,
+        // never fires error and never reconnects, so every alert after a
+        // restart is dropped while the writes still land on disk. A ping the
+        // client can actually see (a comment would not reach onmessage) lets it
+        // notice the silence and reconnect.
+        const beat = setInterval(() => {
+          res.write(`data: ${JSON.stringify({ type: 'ping' })}\n\n`);
+        }, heartbeatMs);
+        beat.unref?.(); // never hold the process open for a heartbeat
+        req.on('close', () => {
+          clearInterval(beat);
+          sseClients.delete(res);
+        });
         return;
       }
 

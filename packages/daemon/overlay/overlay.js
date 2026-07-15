@@ -1326,14 +1326,36 @@
     for (const rec of saved) addTweak(rec, true); // chronological replay → newest ends at the bottom
   })();
 
-  try {
-    const es = new EventSource(`${ORIGIN}/api/events`);
-    es.onmessage = (m) => {
-      const e = JSON.parse(m.data);
-      if (e.type === 'tweak') addTweak(e);
-      if (e.type === 'totals') showTotals(e.totals);
-    };
-  } catch { /* daemon offline */ }
+  // A restarted daemon leaves the EventSource holding a socket to a process that
+  // is gone: the browser keeps it in readyState OPEN, fires no error and never
+  // reconnects, so alerts stop arriving while the edits behind them still land
+  // on disk. Nothing surfaces that — the tray just quietly stops moving. The
+  // daemon pings every 15s, so silence well past that means the stream is a
+  // zombie; drop it and dial again.
+  const SSE_SILENCE_MS = 45000;
+  let es = null;
+  let lastSeen = Date.now();
+  function connectEvents() {
+    try {
+      if (es) es.close();
+      es = new EventSource(`${ORIGIN}/api/events`);
+      es.onopen = () => { lastSeen = Date.now(); };
+      es.onmessage = (m) => {
+        lastSeen = Date.now();
+        const e = JSON.parse(m.data);
+        if (e.type === 'tweak') addTweak(e);
+        if (e.type === 'totals') showTotals(e.totals);
+        // 'ping' needs no handling — arriving at all is the whole point.
+      };
+    } catch { /* daemon offline */ }
+  }
+  connectEvents();
+  setInterval(() => {
+    if (Date.now() - lastSeen > SSE_SILENCE_MS) {
+      lastSeen = Date.now(); // reset first, so a daemon that is still down doesn't reconnect every tick
+      connectEvents();
+    }
+  }, 5000);
   fetch(`${ORIGIN}/api/health`)
     .then((r) => r.json())
     .then((h) => {

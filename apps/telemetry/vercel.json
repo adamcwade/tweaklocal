@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [{ "source": "/v1/events", "destination": "/api/events" }],
+  "functions": {
+    "api/*.js": { "maxDuration": 5 }
+  },
+  "crons": [{ "path": "/api/prune", "schedule": "0 4 1 * *" }]
+}

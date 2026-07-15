@@ -1,0 +1,16 @@
+{
+  "name": "@cmdzero/telemetry",
+  "version": "0.0.1",
+  "private": true,
+  "description": "First-party collector for cmdzero's anonymous usage telemetry.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  }
+}
